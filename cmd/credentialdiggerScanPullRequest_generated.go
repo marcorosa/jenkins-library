@@ -173,18 +173,13 @@ func credentialdiggerScanPullRequestMetadata() config.StepData {
 						Default:     `https://api.github.com`,
 					},
 					{
-						Name: "repository",
-						ResourceRef: []config.ResourceReference{
-							{
-								Name:  "commonPipelineEnvironment",
-								Param: "github/repository",
-							},
-						},
-						Scope:     []string{"PARAMETERS", "STAGES", "STEPS"},
-						Type:      "string",
-						Mandatory: true,
-						Aliases:   []config.Alias{{Name: "githubRepo"}},
-						Default:   os.Getenv("PIPER_repository"),
+						Name:        "repository",
+						ResourceRef: []config.ResourceReference{},
+						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
+						Type:        "string",
+						Mandatory:   true,
+						Aliases:     []config.Alias{{Name: "githubRepo"}},
+						Default:     os.Getenv("PIPER_repository"),
 					},
 					{
 						Name: "token",
