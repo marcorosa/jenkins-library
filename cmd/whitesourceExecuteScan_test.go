@@ -614,11 +614,10 @@ func TestCheckProjectSecurityViolations(t *testing.T) {
 		systemMock.Alerts = []ws.Alert{}
 		influx := whitesourceExecuteScanInflux{}
 
-		severeVulnerabilities, alerts, assessedAlerts, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{}, &influx)
+		severeVulnerabilities, alerts, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{}, &influx)
 		assert.NoError(t, err)
 		assert.Equal(t, 0, severeVulnerabilities)
 		assert.Equal(t, 0, len(alerts))
-		assert.Equal(t, 0, len(assessedAlerts))
 	})
 
 	t.Run("error - some vulnerabilities", func(t *testing.T) {
@@ -629,11 +628,10 @@ func TestCheckProjectSecurityViolations(t *testing.T) {
 		}
 		influx := whitesourceExecuteScanInflux{}
 
-		severeVulnerabilities, alerts, assessedAlerts, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{}, &influx)
+		severeVulnerabilities, alerts, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{}, &influx)
 		assert.Contains(t, fmt.Sprint(err), "1 Open Source Software Security vulnerabilities")
 		assert.Equal(t, 1, severeVulnerabilities)
 		assert.Equal(t, 2, len(alerts))
-		assert.Equal(t, 0, len(assessedAlerts))
 	})
 
 	t.Run("success - assessed vulnerabilities", func(t *testing.T) {
@@ -644,11 +642,10 @@ func TestCheckProjectSecurityViolations(t *testing.T) {
 		}
 		influx := whitesourceExecuteScanInflux{}
 
-		severeVulnerabilities, alerts, assessedAlerts, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{{Vulnerability: "CVE-2025-001", Purls: []format.Purl{{Purl: "pkg:/maven/com.sap/test@1.2.3"}}}, {Vulnerability: "CVE-2025-002", Purls: []format.Purl{{Purl: "pkg:/maven/com.sap/test@1.2.3"}}}}, &influx)
+		severeVulnerabilities, alerts, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{{Vulnerability: "CVE-2025-001", Purls: []format.Purl{{Purl: "pkg:/maven/com.sap/test@1.2.3"}}}, {Vulnerability: "CVE-2025-002", Purls: []format.Purl{{Purl: "pkg:/maven/com.sap/test@1.2.3"}}}}, &influx)
 		assert.NoError(t, err)
 		assert.Equal(t, 0, severeVulnerabilities)
 		assert.Equal(t, 0, len(alerts))
-		assert.Equal(t, 2, len(assessedAlerts))
 	})
 
 	t.Run("error - WhiteSource failure", func(t *testing.T) {
@@ -656,7 +653,7 @@ func TestCheckProjectSecurityViolations(t *testing.T) {
 		systemMock.AlertError = fmt.Errorf("failed to read alerts")
 		influx := whitesourceExecuteScanInflux{}
 
-		_, _, _, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{}, &influx)
+		_, _, err := checkProjectSecurityViolations(&ScanOptions{FailOnSevereVulnerabilities: true}, 7.0, project, systemMock, &[]format.Assessment{}, &influx)
 		assert.Contains(t, fmt.Sprint(err), "failed to retrieve project alerts from WhiteSource")
 	})
 }
