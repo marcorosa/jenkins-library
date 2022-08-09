@@ -1,12 +1,15 @@
 package cmd
 
 import (
-	"fmt"
+	"strconv"
+
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
 )
+
+const piperTempDb string = "piper_step_db.db"
 
 type credentialdiggerScanPullRequestUtils interface {
 	command.ExecRunner
@@ -54,26 +57,50 @@ func credentialdiggerScanPullRequest(config credentialdiggerScanPullRequestOptio
 	// through the log.Entry().Fatal() call leading to an os.Exit(1) in the end.
 	err := runCredentialdiggerScanPullRequest(&config, telemetryData, utils)
 	if err != nil {
-		log.Entry().WithError(err).Fatal("step execution failed")
+		log.Entry().WithError(err).Fatal("Credential Digger scan failed")
 	}
 }
 
 func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestOptions, telemetryData *telemetry.CustomData, utils credentialdiggerScanPullRequestUtils) error {
-	log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
+	// log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
+	log.Entry().Info("Execute scan of pull request with Credential Digger")
+	log.Entry().Info("Load rules")
+	// TODO: dump rules to file
+	// TODO: add rules from temp file
+	// cmd := []string{"credentialdigger", "add_rules", "--sqlite"
+	// piperTempDb, "--overwrite", "--source-root", config.ModulePath}
+	//cmd := []string{"credentialdigger", "add_rules", "--sqlite", piperTempDb}
+	log.Entry().Info("Scan PR")
+	// TODO
+	cmd := []string{"credentialdigger", "scan_pr", config.Repository, "--sqlite", piperTempDb, "--pr", strconv.Itoa(config.PrNumber)}
+	if config.Debug {
+		cmd = append(cmd, "--debug")
+	}
+
+	// TODO: append models
+
+	//err := execute(utils, cmd, GeneralConfig.Verbose)
+	//if err != nil {
+	//	log.Entry().Error("failed running credentialdigger scan_pr")
+	//	return err
+	//}
+
+	log.Entry().Info("Found XX results")
+	// TODO: print these results in the log?
 
 	// Example of calling methods from external dependencies directly on utils:
-	exists, err := utils.FileExists("file.txt")
-	if err != nil {
-		// It is good practice to set an error category.
-		// Most likely you want to do this at the place where enough context is known.
-		log.SetErrorCategory(log.ErrorConfiguration)
-		// Always wrap non-descriptive errors to enrich them with context for when they appear in the log:
-		return fmt.Errorf("failed to check for important file: %w", err)
-	}
-	if !exists {
-		log.SetErrorCategory(log.ErrorConfiguration)
-		return fmt.Errorf("cannot run without important file")
-	}
+	//exists, err := utils.FileExists("file.txt")
+	//if err != nil {
+	//	// It is good practice to set an error category.
+	//	// Most likely you want to do this at the place where enough context is known.
+	//	log.SetErrorCategory(log.ErrorConfiguration)
+	//	// Always wrap non-descriptive errors to enrich them with context for when they appear in the log:
+	//	return fmt.Errorf("failed to check for important file: %w", err)
+	//}
+	//if !exists {
+	//	log.SetErrorCategory(log.ErrorConfiguration)
+	//	return fmt.Errorf("cannot run without important file")
+	//}
 
 	return nil
 }
