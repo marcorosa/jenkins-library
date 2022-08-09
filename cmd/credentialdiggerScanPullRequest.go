@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"strconv"
-
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
@@ -72,10 +70,10 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	//cmd := []string{"credentialdigger", "add_rules", "--sqlite", piperTempDb}
 	log.Entry().Info("Scan PR")
 	// TODO
-	cmd := []string{"credentialdigger", "scan_pr", config.Repository, "--sqlite", piperTempDb, "--pr", strconv.Itoa(config.PrNumber)}
-	if config.Debug {
-		cmd = append(cmd, "--debug")
-	}
+	//cmd := []string{"credentialdigger", "scan_pr", config.Repository, "--sqlite", piperTempDb, "--pr", strconv.Itoa(config.PrNumber)}
+	//if config.Debug {
+	//	cmd = append(cmd, "--debug")
+	//}
 
 	// TODO: append models
 
