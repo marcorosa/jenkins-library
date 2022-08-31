@@ -203,6 +203,9 @@ func credentialdiggerScanPullRequestMetadata() config.StepData {
 					},
 				},
 			},
+			Containers: []config.Container{
+				{Image: "credentialdigger.common.repositories.cloud.sap/credential_digger:4.9.0"},
+			},
 		},
 	}
 	return theMetaData
