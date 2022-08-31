@@ -60,8 +60,6 @@ func credentialdiggerScanPullRequest(config credentialdiggerScanPullRequestOptio
 }
 
 func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestOptions, telemetryData *telemetry.CustomData, utils credentialdiggerScanPullRequestUtils) error {
-	// log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
-	log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step with Credential Digger.")
 	log.Entry().Info("Execute scan of pull request with Credential Digger")
 	log.Entry().Info("Load rules")
 	// TODO: dump rules to file
