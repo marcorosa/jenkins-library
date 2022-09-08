@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os/exec"
+	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
 	"github.com/SAP/jenkins-library/pkg/log"
@@ -70,10 +71,11 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// cmd := []string{"credentialdigger", "add_rules", "--sqlite"
 	// piperTempDb, "--overwrite", "--source-root", config.ModulePath}
 	// TODO: pass rules
-	//cmd_list := []string{"credentialdigger", "add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
-	cmd := exec.Command("credentialdigger", "add_rules",
-		"--sqlite", piperTempDb,
-		"/credential-digger-ui/backend/rules.yml")
+	cmd_list := []string{"credentialdigger", "add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
+	cmd := exec.Command(cmd_list...)
+	// cmd := exec.Command("credentialdigger", "add_rules",
+	// 	"--sqlite", piperTempDb,
+	// 	"/credential-digger-ui/backend/rules.yml")
 	err := cmd.Run()
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger add_rules")
@@ -81,24 +83,25 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	}
 	log.Entry().Info("Rules added")
 
+	log.Entry().Info("Scan PR")
+	// TODO
+	cmd_list = []string{"credentialdigger", "scan_pr", config.Repository, "--sqlite", piperTempDb,
+		"--pr", strconv.Itoa(config.PrNumber),
+		"--api_endpoint", config.ApiUrl,
+		"--git_token", config.Token}
+	if config.Debug {
+		cmd_list = append(cmd_list, "--debug")
+	}
+	// TODO: append models
+
+	cmd = exec.Command(cmd_list...)
+	err = cmd.Run()
+	if err != nil {
+		log.Entry().Error("failed running credentialdigger scan_pr")
+		return err
+	}
+
 	/*
-		log.Entry().Info("Scan PR")
-		// TODO
-		cmd = []string{"credentialdigger", "scan_pr", config.Repository, "--sqlite", piperTempDb,
-			"--pr", strconv.Itoa(config.PrNumber),
-			"--api_endpoint", config.ApiUrl,
-			"--git_token", config.Token}
-		if config.Debug {
-			cmd = append(cmd, "--debug")
-		}
-		// TODO: append models
-
-		err = execute(utils, cmd, GeneralConfig.Verbose)
-		if err != nil {
-			log.Entry().Error("failed running credentialdigger scan_pr")
-			return err
-		}
-
 		cmd = []string{"credentialdigger", "get_discoveries", config.Repository, "--sqlite", piperTempDb,
 			"--state", "new"}
 		err = execute(utils, cmd, GeneralConfig.Verbose)
