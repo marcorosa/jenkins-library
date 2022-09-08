@@ -23,6 +23,11 @@ type credentialdiggerScanPullRequestUtils interface {
 	// Unit tests shall be executable in parallel (not depend on global state), and don't (re-)test dependencies.
 }
 
+func executeCredentialDigger(args []string) error {
+	cmd := exec.Command("credentialdigger", args...)
+	return cmd.Run()
+}
+
 type credentialdiggerScanPullRequestUtilsBundle struct {
 	*command.Command
 	*piperutils.Files
@@ -71,12 +76,9 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// cmd := []string{"credentialdigger", "add_rules", "--sqlite"
 	// piperTempDb, "--overwrite", "--source-root", config.ModulePath}
 	// TODO: pass rules
-	cmd_list := []string{"credentialdigger", "add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
-	cmd := exec.Command(cmd_list...)
-	// cmd := exec.Command("credentialdigger", "add_rules",
-	// 	"--sqlite", piperTempDb,
-	// 	"/credential-digger-ui/backend/rules.yml")
-	err := cmd.Run()
+	//cmd_list := []string{"credentialdigger", "add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
+	cmd_list := []string{"add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
+	err := executeCredentialDigger(cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger add_rules")
 		return err
@@ -85,7 +87,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 
 	log.Entry().Info("Scan PR")
 	// TODO
-	cmd_list = []string{"credentialdigger", "scan_pr", config.Repository, "--sqlite", piperTempDb,
+	cmd_list = []string{"scan_pr", config.Repository, "--sqlite", piperTempDb,
 		"--pr", strconv.Itoa(config.PrNumber),
 		"--api_endpoint", config.ApiUrl,
 		"--git_token", config.Token}
@@ -94,8 +96,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	}
 	// TODO: append models
 
-	cmd = exec.Command(cmd_list...)
-	err = cmd.Run()
+	err = executeCredentialDigger(cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger scan_pr")
 		return err
