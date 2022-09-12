@@ -101,10 +101,14 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	leaks := executeCredentialDigger(cmd_list)
 	if leaks != nil {
 		log.Entry().Warn("The scan found potential leaks in this PR")
-		log.Entry().Warn("%v potential leaks found", leaks)
+		// log.Entry().Warn("%v potential leaks found", leaks)
+	} else {
+		log.Entry().Info("No leaks found")
+		// There is no need to print the discoveries if there are none
+		return nil
 	}
 
-	cmd_list = []string{"credentialdigger", "get_discoveries", config.Repository, "--sqlite", piperTempDb,
+	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDb,
 		"--state", "new"}
 	// err = execute(utils, cmd, GeneralConfig.Verbose)
 	err = executeCredentialDigger(cmd_list)
@@ -113,7 +117,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		return err
 	}
 
-	log.Entry().Info("Found XX results")
+	log.Entry().Info("Scan complete")
 	// TODO: print these results in the log?
 
 	// Example of calling methods from external dependencies directly on utils:
