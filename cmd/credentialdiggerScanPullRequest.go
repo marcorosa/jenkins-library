@@ -73,10 +73,6 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	log.Entry().Info("Load rules")
 	// TODO: dump rules to file
 	// TODO: add rules from temp file
-	// cmd := []string{"credentialdigger", "add_rules", "--sqlite"
-	// piperTempDb, "--overwrite", "--source-root", config.ModulePath}
-	// TODO: pass rules
-	//cmd_list := []string{"credentialdigger", "add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
 	cmd_list := []string{"add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
 	err := executeCredentialDigger(cmd_list)
 	if err != nil {
@@ -92,10 +88,11 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		"--api_endpoint", config.APIURL,
 		"--git_token", config.Token}
 
-	// TODO: inherit Debug from general pipeline "Verbose" parameter
-	// if config.Debug {
-	// 	cmd_list = append(cmd_list, "--debug")
-	// }
+	// Inherit Debug from general pipeline "Verbose" parameter
+	if GeneralConfig.Verbose {
+		log.Entry().Debug("Execute scan in debug mode")
+		cmd_list = append(cmd_list, "--debug")
+	}
 	// TODO: append models
 
 	leaks := executeCredentialDigger(cmd_list)
@@ -108,9 +105,9 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		return nil
 	}
 
+	// Get discoveries
 	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDb,
 		"--state", "new"}
-	// err = execute(utils, cmd, GeneralConfig.Verbose)
 	err = executeCredentialDigger(cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
