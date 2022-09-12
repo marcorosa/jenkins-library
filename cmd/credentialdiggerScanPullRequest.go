@@ -89,11 +89,13 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// TODO
 	cmd_list = []string{"scan_pr", config.Repository, "--sqlite", piperTempDb,
 		"--pr", strconv.Itoa(config.PrNumber),
-		"--api_endpoint", config.ApiUrl,
+		"--api_endpoint", config.APIURL,
 		"--git_token", config.Token}
-	if config.Debug {
-		cmd_list = append(cmd_list, "--debug")
-	}
+
+	// TODO: inherit Debug from general pipeline "Verbose" parameter
+	// if config.Debug {
+	// 	cmd_list = append(cmd_list, "--debug")
+	// }
 	// TODO: append models
 
 	err = executeCredentialDigger(cmd_list)
@@ -102,15 +104,14 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		return err
 	}
 
-	/*
-		cmd = []string{"credentialdigger", "get_discoveries", config.Repository, "--sqlite", piperTempDb,
-			"--state", "new"}
-		err = execute(utils, cmd, GeneralConfig.Verbose)
-		if err != nil {
-			log.Entry().Error("failed running credentialdigger get_discoveries")
-			return err
-		}
-	*/
+	cmd_list = []string{"credentialdigger", "get_discoveries", config.Repository, "--sqlite", piperTempDb,
+		"--state", "new"}
+	// err = execute(utils, cmd, GeneralConfig.Verbose)
+	err = executeCredentialDigger(cmd_list)
+	if err != nil {
+		log.Entry().Error("failed running credentialdigger get_discoveries")
+		return err
+	}
 
 	log.Entry().Info("Found XX results")
 	// TODO: print these results in the log?
