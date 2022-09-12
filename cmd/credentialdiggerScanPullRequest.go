@@ -98,10 +98,10 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// }
 	// TODO: append models
 
-	err = executeCredentialDigger(cmd_list)
-	if err != nil {
-		log.Entry().Error("failed running credentialdigger scan_pr")
-		return err
+	leaks := executeCredentialDigger(cmd_list)
+	if leaks != nil {
+		log.Entry().Warn("The scan found potential leaks in this PR")
+		log.Entry().Warn("%v potential leaks found", leaks)
 	}
 
 	cmd_list = []string{"credentialdigger", "get_discoveries", config.Repository, "--sqlite", piperTempDb,
