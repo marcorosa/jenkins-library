@@ -109,7 +109,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	log.Entry().Info("Get discoveries")
 	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDb,
 		"--state", "new",
-		"--save", "target/findings.csv"}
+		"--save", "/credential-digger-ui/findings.csv"}
 	err = executeCredentialDigger(cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
