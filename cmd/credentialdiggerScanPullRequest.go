@@ -11,11 +11,13 @@ import (
 )
 
 const piperTempDb string = "piper_step_db.db"
+const reportTempName string = "/credential-digger-ui/findings.csv"
 
 type credentialdiggerScanPullRequestUtils interface {
 	command.ExecRunner
 
-	FileExists(filename string) (bool, error)
+	piperutils.FileUtils
+	//FileExists(filename string) (bool, error)
 
 	// Add more methods here, or embed additional interfaces, or remove/replace as required.
 	// The credentialdiggerScanPullRequestUtils interface should be descriptive of your runtime dependencies,
@@ -109,12 +111,16 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	log.Entry().Info("Get discoveries")
 	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDb,
 		"--state", "new",
-		"--save", "/credential-digger-ui/findings.csv"}
+		"--save", reportTempName}
 	err = executeCredentialDigger(cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
 		return err
 	}
+
+	// Persist the report in the workspace
+	reports := []piperutils.Path{{Target: reportTempName}}
+	piperutils.PersistReportsAndLinks("credentialdiggerScanPullRequest", "./", utils, reports, nil)
 
 	log.Entry().Info("Scan complete")
 	// TODO: print these results in the log?
