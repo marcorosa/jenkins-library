@@ -87,14 +87,15 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// TODO
 	cmd_list = []string{"scan_pr", config.Repository, "--sqlite", piperTempDb,
 		"--pr", strconv.Itoa(config.PrNumber),
+		"--debug",
 		"--api_endpoint", config.APIURL,
 		"--git_token", config.Token}
 
 	// Inherit Debug from general pipeline "Verbose" parameter
-	if GeneralConfig.Verbose {
-		log.Entry().Debug("Execute scan in debug mode")
-		cmd_list = append(cmd_list, "--debug")
-	}
+	// if GeneralConfig.Verbose {
+	// 	log.Entry().Debug("Execute scan in debug mode")
+	// 	cmd_list = append(cmd_list, "--debug")
+	// }
 	// TODO: append models
 
 	leaks := executeCredentialDigger(cmd_list)
