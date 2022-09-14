@@ -11,7 +11,7 @@ import (
 )
 
 const piperTempDb string = "piper_step_db.db"
-const reportTempName string = "/credential-digger-ui/findings.csv"
+const reportTempName string = "findings.csv"
 
 type credentialdiggerScanPullRequestUtils interface {
 	command.ExecRunner
@@ -82,6 +82,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		return err
 	}
 	log.Entry().Info("Rules added")
+	exec.Command("sqlite3", piperTempDb, "\"select * from rules;\"")
 
 	log.Entry().Info("Scan PR")
 	// TODO
@@ -107,6 +108,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		// There is no need to print the discoveries if there are none
 		return nil
 	}
+	exec.Command("sqlite3", piperTempDb, "\"select * from discoveries;\"")
 
 	// Get discoveries
 	log.Entry().Info("Get discoveries")
