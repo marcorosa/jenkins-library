@@ -118,12 +118,16 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		return err
 	}
 
-	// Persist the report in the workspace
-	reports := []piperutils.Path{{Target: reportTempName}}
-	piperutils.PersistReportsAndLinks("credentialdiggerScanPullRequest", "./", utils, reports, nil)
-
 	log.Entry().Info("Scan complete")
-	// TODO: print these results in the log?
+
+	// Persist the report in the workspace
+	reports := []piperutils.Path{{Target: reportTempName, Name: "reportFindings", Mandatory: true}}
+	err = piperutils.PersistReportsAndLinks("credentialdiggerScanPullRequest", "", utils, reports, nil)
+	if err != nil {
+		log.Entry().Error("Failed to persist report")
+	} else {
+		log.Entry().Info("Report successfully persisted")
+	}
 
 	// Example of calling methods from external dependencies directly on utils:
 	//exists, err := utils.FileExists("file.txt")
