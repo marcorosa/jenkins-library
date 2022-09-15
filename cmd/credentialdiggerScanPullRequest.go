@@ -82,7 +82,8 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		return err
 	}
 	log.Entry().Info("Rules added")
-	exec.Command("sqlite3", piperTempDb, "\"select * from rules;\"")
+	res := exec.Command("sqlite3", piperTempDb, "\"select * from rules;\"")
+	log.Entry().Info("%v", res)
 
 	log.Entry().Info("Scan PR")
 	// TODO
@@ -103,12 +104,14 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	if leaks != nil {
 		log.Entry().Warn("The scan found potential leaks in this PR")
 		// log.Entry().Warn("%v potential leaks found", leaks)
+		log.Entry().Warn("%v", leaks)
 	} else {
 		log.Entry().Info("No leaks found")
 		// There is no need to print the discoveries if there are none
 		return nil
 	}
-	exec.Command("sqlite3", piperTempDb, "\"select * from discoveries;\"")
+	res = exec.Command("sqlite3", piperTempDb, "\"select * from discoveries;\"")
+	log.Entry().Info("%v", res)
 
 	// Get discoveries
 	log.Entry().Info("Get discoveries")
