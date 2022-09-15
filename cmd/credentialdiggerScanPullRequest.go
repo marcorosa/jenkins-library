@@ -82,7 +82,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		return err
 	}
 	log.Entry().Info("Rules added")
-	res := exec.Command("sqlite3", piperTempDb, "\"select * from rules;\"")
+	res := exec.Command("sqlite3", piperTempDb, "\"select * from rules;\"").Run()
 	log.Entry().Info("%v", res)
 
 	log.Entry().Info("Scan PR")
@@ -110,7 +110,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		// There is no need to print the discoveries if there are none
 		return nil
 	}
-	res = exec.Command("sqlite3", piperTempDb, "\"select * from discoveries;\"")
+	res = exec.Command("sqlite3", piperTempDb, "\"select * from discoveries;\"").Run()
 	log.Entry().Info("%v", res)
 
 	// Get discoveries
