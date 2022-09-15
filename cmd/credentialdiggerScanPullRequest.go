@@ -83,7 +83,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	}
 	log.Entry().Info("Rules added")
 	//res := exec.Command("sqlite3", piperTempDb, "\"select * from rules;\"").Run()
-	res := exec.Command("python3 -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
+	res := exec.Command("python -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
 		"'); cursor=conn.cursor(); print(cursor.execute('select * from rules').fetchall())", "\"").Run()
 	log.Entry().Info("%v", res)
 
@@ -112,7 +112,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		// There is no need to print the discoveries if there are none
 		return nil
 	}
-	res = exec.Command("python3 -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
+	res = exec.Command("python -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
 		"'); cursor=conn.cursor(); print(cursor.execute('select * from discoveries').fetchall())", "\"").Run()
 	log.Entry().Info("%v", res)
 
