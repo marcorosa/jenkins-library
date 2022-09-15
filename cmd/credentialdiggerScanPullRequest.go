@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"os/exec"
 	"strconv"
 
@@ -27,6 +28,8 @@ type credentialdiggerScanPullRequestUtils interface {
 
 func executeCredentialDigger(args []string) error {
 	cmd := exec.Command("credentialdigger", args...)
+	var out bytes.Buffer
+	cmd.Stdout = &out
 	return cmd.Run()
 }
 
@@ -83,9 +86,9 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	}
 	log.Entry().Info("Rules added")
 	//res := exec.Command("sqlite3", piperTempDb, "\"select * from rules;\"").Run()
-	res := exec.Command("python -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
-		"'); cursor=conn.cursor(); print(cursor.execute('select * from rules').fetchall())", "\"").Run()
-	log.Entry().Info("%v", res)
+	// res := exec.Command("python -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
+	// 	"'); cursor=conn.cursor(); print(cursor.execute('select * from rules').fetchall())", "\"").Run()
+	// log.Entry().Info("%v", res)
 
 	log.Entry().Info("Scan PR")
 	// TODO
@@ -112,9 +115,9 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		// There is no need to print the discoveries if there are none
 		return nil
 	}
-	res = exec.Command("python -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
-		"'); cursor=conn.cursor(); print(cursor.execute('select * from discoveries').fetchall())", "\"").Run()
-	log.Entry().Info("%v", res)
+	// res = exec.Command("python -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
+	// 	"'); cursor=conn.cursor(); print(cursor.execute('select * from discoveries').fetchall())", "\"").Run()
+	// log.Entry().Info("%v", res)
 
 	// Get discoveries
 	log.Entry().Info("Get discoveries")
