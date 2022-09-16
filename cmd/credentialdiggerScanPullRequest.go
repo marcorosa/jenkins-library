@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"bytes"
-	"os/exec"
 	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
@@ -26,11 +24,8 @@ type credentialdiggerScanPullRequestUtils interface {
 	// Unit tests shall be executable in parallel (not depend on global state), and don't (re-)test dependencies.
 }
 
-func executeCredentialDigger(args []string) error {
-	cmd := exec.Command("credentialdigger", args...)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	return cmd.Run()
+func executeCredentialDigger(utils credentialdiggerScanPullRequestUtils, args []string) error {
+	return utils.RunExecutable("credentialdigger", args...)
 }
 
 type credentialdiggerScanPullRequestUtilsBundle struct {
@@ -79,7 +74,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// TODO: dump rules to file
 	// TODO: add rules from temp file
 	cmd_list := []string{"add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
-	err := executeCredentialDigger(cmd_list)
+	err := executeCredentialDigger(utils, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger add_rules")
 		return err
@@ -105,7 +100,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// }
 	// TODO: append models
 
-	leaks := executeCredentialDigger(cmd_list)
+	leaks := executeCredentialDigger(utils, cmd_list)
 	if leaks != nil {
 		log.Entry().Warn("The scan found potential leaks in this PR")
 		// log.Entry().Warn("%v potential leaks found", leaks)
@@ -124,7 +119,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDb,
 		"--state", "new",
 		"--save", reportTempName}
-	err = executeCredentialDigger(cmd_list)
+	err = executeCredentialDigger(utils, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
 		return err
