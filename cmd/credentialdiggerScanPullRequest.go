@@ -30,7 +30,7 @@ func executeCredentialDigger(utils credentialdiggerScanPullRequestUtils, args []
 	return utils.RunExecutable("credentialdigger", args...)
 }
 
-func verifyGithubConnection(config credentialdiggerScanPullRequestOptions) {
+func verifyGithubConnection(config *credentialdiggerScanPullRequestOptions) {
 	ctx, client, err := piperGithub.NewClient(config.Token, config.APIURL, "", nil)
 	if err != nil {
 		log.Entry().WithError(err).Warning("Failed to get GitHub client")
@@ -81,7 +81,7 @@ func credentialdiggerScanPullRequest(config credentialdiggerScanPullRequestOptio
 
 func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestOptions, telemetryData *telemetry.CustomData, utils credentialdiggerScanPullRequestUtils) error {
 	log.Entry().Info("Execute scan of pull request with Credential Digger")
-	verifyGithubConnection(&config)
+	verifyGithubConnection(config)
 
 	log.Entry().Info("Load rules")
 	// TODO: dump rules to file
