@@ -88,6 +88,13 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	cmd_list = []string{"scan", "https://github.com/sap/credential-digger-tests",
 		"--sqlite", piperTempDb,
 		"--debug"}
+	testLeaks := executeCredentialDigger(utils, cmd_list)
+	if testLeaks != nil {
+		log.Entry().Error("Error raised during test scan")
+		log.Entry().Info(testLeaks)
+	} else {
+		log.Entry().Info("The test scan completed")
+	}
 
 	log.Entry().Info("Scan PR")
 	//log.Entry().Warn("Use token %v", config.Token)
