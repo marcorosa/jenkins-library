@@ -7,6 +7,8 @@ import (
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
+
+	piperGithub "github.com/SAP/jenkins-library/pkg/github"
 )
 
 const piperTempDb string = "piper_step_db.db"
@@ -26,6 +28,16 @@ type credentialdiggerScanPullRequestUtils interface {
 
 func executeCredentialDigger(utils credentialdiggerScanPullRequestUtils, args []string) error {
 	return utils.RunExecutable("credentialdigger", args...)
+}
+
+func verifyGithubConnection(config credentialdiggerScanPullRequestOptions) {
+	ctx, client, err := piperGithub.NewClient(config.Token, config.APIURL, "", nil)
+	if err != nil {
+		log.Entry().WithError(err).Warning("Failed to get GitHub client")
+		log.Entry().Error(err)
+	} else {
+		log.Entry().Info("GitHub client works")
+	}
 }
 
 type credentialdiggerScanPullRequestUtilsBundle struct {
@@ -69,6 +81,7 @@ func credentialdiggerScanPullRequest(config credentialdiggerScanPullRequestOptio
 
 func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestOptions, telemetryData *telemetry.CustomData, utils credentialdiggerScanPullRequestUtils) error {
 	log.Entry().Info("Execute scan of pull request with Credential Digger")
+	verifyGithubConnection(&config)
 
 	log.Entry().Info("Load rules")
 	// TODO: dump rules to file
