@@ -84,6 +84,10 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	// res := exec.Command("python -c", "\"", "import sqlite3; conn = sqlite3.connect('", piperTempDb,
 	// 	"'); cursor=conn.cursor(); print(cursor.execute('select * from rules').fetchall())", "\"").Run()
 	// log.Entry().Info("%v", res)
+	log.Entry().Info("Scan a test repo")
+	cmd_list = []string{"scan", "https://github.com/sap/credential-digger-tests",
+		"--sqlite", piperTempDb,
+		"--debug"}
 
 	log.Entry().Info("Scan PR")
 	//log.Entry().Warn("Use token %v", config.Token)
