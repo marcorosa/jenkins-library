@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
+	piperGithub "github.com/SAP/jenkins-library/pkg/github"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
@@ -69,6 +70,12 @@ func credentialdiggerScanPullRequest(config credentialdiggerScanPullRequestOptio
 
 func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestOptions, telemetryData *telemetry.CustomData, utils credentialdiggerScanPullRequestUtils) error {
 	log.Entry().Info("Execute scan of pull request with Credential Digger")
+
+	// TODO: test
+	ctx, ghClient, gherr := piperGithub.NewClient(config.Token, config.APIURL, "", []string{})
+	if gherr != nil {
+		log.Entry().WithError(gherr).Warning("Failed to get GitHub client")
+	}
 
 	log.Entry().Info("Load rules")
 	// TODO: dump rules to file
