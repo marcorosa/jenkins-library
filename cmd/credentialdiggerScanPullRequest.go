@@ -98,13 +98,14 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	}
 
 	log.Entry().Info("Scan PR")
-	log.Entry().Info("Scan PR %v from repo %v", config.PrNumber, config.Repository)
+	log.Entry().Info("Scan PR %s from repo %s", config.PrNumber, config.Repository)
 	//log.Entry().Warn("Use token %v", config.Token)
 	log.Entry().Infof("  Token: '%s'", config.Token)
 	// TODO
 	cmd_list = []string{"scan_pr", config.Repository, "--sqlite", piperTempDb,
 		"--pr", strconv.Itoa(config.PrNumber),
 		"--debug",
+		"--force",
 		"--api_endpoint", config.APIURL,
 		"--git_token", config.Token}
 
