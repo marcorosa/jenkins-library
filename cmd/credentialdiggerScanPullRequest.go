@@ -76,6 +76,15 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	if gherr != nil {
 		log.Entry().WithError(gherr).Warning("Failed to get GitHub client")
 	}
+	// list public repositories for org "sap"
+	//opt := &github.RepositoryListByOrgOptions{Type: "public"}
+	repos, _, eerr := ghClient.Repositories.ListByOrg(ctx, "sap", nil) // opt in place of nil when using options
+	if eerr != nil {
+		log.Entry().WithError(eerr).Warning("Failed to get repos")
+	} else {
+		log.Entry().Info("These are the repos")
+		log.Entry().Info(repos)
+	}
 
 	log.Entry().Info("Load rules")
 	// TODO: dump rules to file
