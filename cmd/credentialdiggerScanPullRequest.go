@@ -98,7 +98,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	}
 
 	log.Entry().Info("Scan PR")
-	log.Entry().Info("Scan PR %s from repo %s", config.PrNumber, config.Repository)
+	log.Entry().Info("Scan PR ", config.PrNumber, " from repo ", config.Repository)
 	//log.Entry().Warn("Use token %v", config.Token)
 	log.Entry().Infof("  Token: '%s'", config.Token)
 	// TODO
