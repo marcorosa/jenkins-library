@@ -78,7 +78,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 	}
 	// list public repositories for org "sap"
 	//opt := &github.RepositoryListByOrgOptions{Type: "public"}
-	repos, _, eerr := ghClient.Repositories.ListByOrg(ctx, "sap", nil) // opt in place of nil when using options
+	repos, _, eerr := ghClient.Repositories.ListByOrg(ctx, "I355397", nil) // opt in place of nil when using options
 	if eerr != nil {
 		log.Entry().WithError(eerr).Warning("Failed to get repos")
 	} else {
