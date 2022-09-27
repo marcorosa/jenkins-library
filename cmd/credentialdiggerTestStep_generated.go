@@ -210,9 +210,9 @@ func credentialdiggerTestStepMetadata() config.StepData {
 					},
 				},
 			},
-			Containers: []config.Container{
-				{Image: "credentialdigger.int.repositories.cloud.sap/credential_digger:4.9.2"},
-			},
+			//Containers: []config.Container{
+			//	{Image: "credentialdigger.int.repositories.cloud.sap/credential_digger:4.9.2"},
+			//},
 		},
 	}
 	return theMetaData
