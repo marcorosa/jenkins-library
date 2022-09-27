@@ -40,8 +40,8 @@ func newCDUtils() credentialdiggerUtils {
 		Files:   &piperutils.Files{},
 	}
 	// Reroute command output to logging framework
-	//utils.Stdout(log.Writer())
-	//utils.Stderr(log.Writer())
+	utils.Stdout(log.Writer())
+	utils.Stderr(log.Writer())
 	return &utils
 }
 
