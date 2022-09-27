@@ -85,6 +85,18 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		log.Entry().Info("These are the repos")
 		log.Entry().Info(repos)
 	}
+	// Test with general token
+	ctx, ghClient, gherr = piperGithub.NewClient(config.githubTokenCredentialsId, config.APIURL, "", []string{})
+	if gherr != nil {
+		log.Entry().WithError(gherr).Warning("Failed to get GitHub client")
+	}
+	repos, _, eerr = ghClient.Repositories.ListByOrg(ctx, "I355397", nil)
+	if eerr != nil {
+		log.Entry().WithError(eerr).Warning("Failed to get repos")
+	} else {
+		log.Entry().Info("These are the repos")
+		log.Entry().Info(repos)
+	}
 
 	log.Entry().Info("Load rules")
 	// TODO: dump rules to file
