@@ -95,6 +95,7 @@ nav:
         - containerExecuteStructureTests: steps/containerExecuteStructureTests.md
         - containerPushToRegistry: steps/containerPushToRegistry.md
         - credentialdiggerScanPullRequest: steps/crendialdiggerScanPullRequest.md
+        - credentialdiggerTestStep: steps/crendialdiggerTestStep.md
         - debugReportArchive: steps/debugReportArchive.md
         - detectExecuteScan: steps/detectExecuteScan.md
         - dockerExecute: steps/dockerExecute.md
