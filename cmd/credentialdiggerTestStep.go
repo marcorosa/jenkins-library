@@ -12,8 +12,6 @@ import (
 	"github.com/SAP/jenkins-library/pkg/telemetry"
 	"github.com/google/go-github/v45/github"
 	"github.com/pkg/errors"
-
-	piperGithub "github.com/SAP/jenkins-library/pkg/github"
 )
 
 const piperTempDb string = "piper_step_db.db"
@@ -48,13 +46,13 @@ func newCDUtils() credentialdiggerUtils {
 }
 
 func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) {
-	ctx, client, err := piperGithub.NewClient(config.Token, config.APIURL, "", []string{})
-	if err != nil {
-		log.Entry().WithError(err).Fatal("Failed to get GitHub client")
-	}
+	//ctx, client, err := piperGithub.NewClient(config.Token, config.APIURL, "", []string{})
+	//if err != nil {
+	//	log.Entry().WithError(err).Fatal("Failed to get GitHub client")
+	//}
 	//err = runCredentialdiggerTestStep(ctx, &config, telemetryData, client.Issues)  // commentIssue step
 	//err = runCredentialdiggerTestStep(ctx, &config, telemetryData, client.Repositories)  // list repos by org
-	err = runTestScanPR(&config, telemetryData) // scan PR with CD
+	err := runTestScanPR(&config, telemetryData) // scan PR with CD
 	//err = runGHList(ctx, &config, telemetryData, client.Repositories)
 	if err != nil {
 		//log.Entry().WithError(err).Fatal("Failed to comment on issue")
@@ -72,7 +70,7 @@ func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryD
 //	return nil
 //}
 
-func executeCredentialDigger(utils credentialdiggerTestStepService, args []string) error {
+func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) error {
 	return utils.RunExecutable("credentialdigger", args...)
 }
 
@@ -81,7 +79,7 @@ func runTestScanPR(config *credentialdiggerTestStepOptions, telemetryData *telem
 	// 1
 	log.Entry().Info("Load rules")
 	cmd_list := []string{"add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
-	err := executeCredentialDigger(service, cmd_list)
+	err := executeCredentialDiggerProcess(service, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger add_rules")
 		return err
@@ -98,7 +96,7 @@ func runTestScanPR(config *credentialdiggerTestStepOptions, telemetryData *telem
 		"--force",
 		"--api_endpoint", config.APIURL,
 		"--git_token", config.Token}
-	leaks := executeCredentialDigger(service, cmd_list)
+	leaks := executeCredentialDiggerProcess(service, cmd_list)
 	if leaks != nil {
 		log.Entry().Warn("The scan found potential leaks in this PR")
 		// log.Entry().Warn("%v potential leaks found", leaks)
@@ -113,7 +111,7 @@ func runTestScanPR(config *credentialdiggerTestStepOptions, telemetryData *telem
 	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDb,
 		"--state", "new",
 		"--save", reportTempName}
-	err = executeCredentialDigger(service, cmd_list)
+	err = executeCredentialDiggerProcess(service, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
 		return err
