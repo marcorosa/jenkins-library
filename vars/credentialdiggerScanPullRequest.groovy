@@ -4,7 +4,7 @@ import groovy.transform.Field
 @Field String METADATA_FILE = 'metadata/credentialdiggerScanPullRequest.yaml'
 
 void call(Map parameters = [:]) {
-    // List credentials = [[type: 'token', id: 'githubTokenCredentialsId', env: ['PIPER_githubToken']]]
-    List credentials = []
+    List credentials = [[type: 'token', id: 'githubTokenCredentialsId', env: ['PIPER_githubToken']]]
+    // List credentials = []
     piperExecuteBin(parameters, STEP_NAME, METADATA_FILE, credentials)
 }
