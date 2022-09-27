@@ -14,8 +14,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-const piperTempDb string = "piper_step_db.db"
-const reportTempName string = "findings.csv"
+const piperTempDbName string = "piper_step_db.db"
+const piperReportTempName string = "findings.csv"
 
 type credentialdiggerTestStepService interface {
 	//CreateComment(ctx context.Context, owner string, repo string, number int, comment *github.IssueComment) (*github.IssueComment, *github.Response, error)
@@ -78,7 +78,7 @@ func runTestScanPR(config *credentialdiggerTestStepOptions, telemetryData *telem
 	service := newCDUtils()
 	// 1
 	log.Entry().Info("Load rules")
-	cmd_list := []string{"add_rules", "--sqlite", piperTempDb, "/credential-digger-ui/backend/rules.yml"}
+	cmd_list := []string{"add_rules", "--sqlite", piperTempDbName, "/credential-digger-ui/backend/rules.yml"}
 	err := executeCredentialDiggerProcess(service, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger add_rules")
@@ -90,7 +90,7 @@ func runTestScanPR(config *credentialdiggerTestStepOptions, telemetryData *telem
 	log.Entry().Info("Scan PR")
 	log.Entry().Info("Scan PR ", config.Number, " from repo ", config.Repository)
 	log.Entry().Infof("  Token: '%s'", config.Token)
-	cmd_list = []string{"scan_pr", config.Repository, "--sqlite", piperTempDb,
+	cmd_list = []string{"scan_pr", config.Repository, "--sqlite", piperTempDbName,
 		"--pr", strconv.Itoa(config.Number),
 		"--debug",
 		"--force",
@@ -108,9 +108,9 @@ func runTestScanPR(config *credentialdiggerTestStepOptions, telemetryData *telem
 
 	// 3
 	log.Entry().Info("Get discoveries")
-	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDb,
+	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDbName,
 		"--state", "new",
-		"--save", reportTempName}
+		"--save", piperReportTempName}
 	err = executeCredentialDiggerProcess(service, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
