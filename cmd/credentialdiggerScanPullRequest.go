@@ -86,7 +86,7 @@ func runCredentialdiggerScanPullRequest(config *credentialdiggerScanPullRequestO
 		log.Entry().Info(repos)
 	}
 	// Test with general token
-	ctx, ghClient, gherr = piperGithub.NewClient(config.githubTokenCredentialsId, config.APIURL, "", []string{})
+	ctx, ghClient, gherr = piperGithub.NewClient(config.Token, config.APIURL, "", []string{})
 	if gherr != nil {
 		log.Entry().WithError(gherr).Warning("Failed to get GitHub client")
 	}
