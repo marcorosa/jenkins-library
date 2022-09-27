@@ -13,8 +13,9 @@ import (
 )
 
 type credentialdiggerTestStepService interface {
-	// TODO: get owner and repo from repository string
 	CreateComment(ctx context.Context, owner string, repo string, number int, comment *github.IssueComment) (*github.IssueComment, *github.Response, error)
+
+	ListByOrg(ctx context.Context, owner string) (*github.RepositoriesService, *github.Response, error)
 }
 
 func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) {
@@ -22,10 +23,31 @@ func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryD
 	if err != nil {
 		log.Entry().WithError(err).Fatal("Failed to get GitHub client")
 	}
-	err = runCredentialdiggerTestStep(ctx, &config, telemetryData, client.Issues)
+	//err = runCredentialdiggerTestStep(ctx, &config, telemetryData, client.Issues)
+	err = runGHList(ctx, &config, telemetryData, client.Repositories)
 	if err != nil {
-		log.Entry().WithError(err).Fatal("Failed to comment on issue")
+		//log.Entry().WithError(err).Fatal("Failed to comment on issue")
+		log.Entry().WithError(err).Fatal("Failed to run custom function")
 	}
+}
+
+func runGHList(ctx context.Context, config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData, service credentialdiggerTestStepService) error {
+	s := strings.Split(config.Repository, "/")
+	owner := s[len(s)-2]
+	// repoName := s[len(s)-1]
+	repos, resp, err := service.ListByOrg(ctx, owner)
+	//newcomment, resp, err := service.CreateComment(ctx, owner, repoName, config.Number, &issueComment)
+	if err != nil {
+		log.Entry().Errorf("GitHub response code %v", resp.Status)
+		return errors.Wrapf(err, "Error occurred when listing repos of owner %v", owner)
+	}
+	log.Entry().Debugf("Repos listed for owner %v", owner)
+	log.Entry().Info(repos)
+	//for i, r := range repos {
+	//	log.Entry().Info(i, r)
+	//}
+
+	return nil
 }
 
 func runCredentialdiggerTestStep(ctx context.Context, config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData, service credentialdiggerTestStepService) error {
@@ -38,7 +60,8 @@ func runCredentialdiggerTestStep(ctx context.Context, config *credentialdiggerTe
 	s := strings.Split(config.Repository, "/")
 	owner := s[len(s)-2]
 	repoName := s[len(s)-1]
-	newcomment, resp, err := service.CreateComment(ctx, owner, repoName, config.Number, &issueComment)
+	// newcomment, resp, err := service.CreateComment(ctx, owner, repoName, config.Number, &issueComment)
+	newcomment, resp, err := service.ListByOrg(ctx, owner)
 	if err != nil {
 		log.Entry().Errorf("GitHub response code %v", resp.Status)
 		return errors.Wrapf(err, "Error occurred when creating comment on issue %v", config.Number)
