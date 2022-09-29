@@ -58,12 +58,13 @@ func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryD
 	if err1 != nil {
 		log.Entry().WithError(err).Fatal("Failed to list repos")
 	}
-	//err2 := runTestScanPR(&config, telemetryData) // scan PR with CD
-	err2 := runTestClone(&config, telemetryData) // clone from bash
+	err2 := runTestScanPR(&config, telemetryData) // scan PR with CD
+	//err2 := runTestClone(&config, telemetryData) // clone from bash
 	if err2 != nil {
 		log.Entry().WithError(err2).Fatal("Failed to run custom function")
 	}
-	err3 := runTestShell(&config, telemetryData) // full scan a repo with CD
+	//err3 := runTestFullScan(&config, telemetryData) // full scan a repo with CD
+	err3 := runTestShell(&config, telemetryData) // Run bash script
 	if err3 != nil {
 		log.Entry().WithError(err3).Fatal("Failed to run full scan")
 	}
