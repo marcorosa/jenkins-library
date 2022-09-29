@@ -58,7 +58,8 @@ func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryD
 	if err1 != nil {
 		log.Entry().WithError(err).Fatal("Failed to list repos")
 	}
-	err2 := runTestScanPR(&config, telemetryData) // scan PR with CD
+	//err2 := runTestScanPR(&config, telemetryData) // scan PR with CD
+	err2 := runTestClone(&config, telemetryData) // scan PR with CD
 	//err = runGHList(ctx, &config, telemetryData, client.Repositories)
 	if err2 != nil {
 		log.Entry().WithError(err).Fatal("Failed to run custom function")
@@ -77,6 +78,18 @@ func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryD
 
 func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) error {
 	return utils.RunExecutable("credentialdigger", args...)
+}
+
+func runTestClone(config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) error {
+	utils := newCDUtils()
+	var sb strings.Builder
+	sb.WriteString("https://oauth2:")
+	sb.WriteString(config.Token)
+	sb.WriteString("@")
+	repo := strings.Replace(config.Repository, "https://", sb.String(), 1)
+	log.Entry().Info("Clone repo: ", sb.String())
+
+	return utils.RunExecutable("git", "clone", repo)
 }
 
 func runTestScanPR(config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) error {
