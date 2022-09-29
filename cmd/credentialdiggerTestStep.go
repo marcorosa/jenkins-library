@@ -12,8 +12,6 @@ import (
 	"github.com/SAP/jenkins-library/pkg/telemetry"
 	"github.com/google/go-github/v45/github"
 	"github.com/pkg/errors"
-
-	piperGithub "github.com/SAP/jenkins-library/pkg/github"
 )
 
 const piperTempDbName string = "piper_step_db.db"
@@ -49,15 +47,15 @@ func newCDUtils() credentialdiggerUtils {
 }
 
 func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) {
-	ctx, client, err := piperGithub.NewClient(config.Token, config.APIURL, "", []string{})
-	if err != nil {
-		log.Entry().WithError(err).Fatal("Failed to get GitHub client")
-	}
+	//ctx, client, err := piperGithub.NewClient(config.Token, config.APIURL, "", []string{})
+	//if err != nil {
+	//	log.Entry().WithError(err).Fatal("Failed to get GitHub client")
+	//}
 	//err = runCredentialdiggerTestStep(ctx, &config, telemetryData, client.Issues)  // commentIssue step
-	err1 := runCredentialdiggerTestStep(ctx, &config, telemetryData, client.Repositories) // list repos by org
-	if err1 != nil {
-		log.Entry().WithError(err).Fatal("Failed to list repos")
-	}
+	//err1 := runCredentialdiggerTestStep(ctx, &config, telemetryData, client.Repositories) // list repos by org
+	//if err1 != nil {
+	//	log.Entry().WithError(err).Fatal("Failed to list repos")
+	//}
 	err2 := runTestScanPR(&config, telemetryData) // scan PR with CD
 	//err2 := runTestClone(&config, telemetryData) // clone from bash
 	if err2 != nil {
