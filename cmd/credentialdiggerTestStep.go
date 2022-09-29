@@ -22,7 +22,8 @@ const piperReportTempName string = "findings.csv"
 type credentialdiggerTestStepService interface {
 	//CreateComment(ctx context.Context, owner string, repo string, number int, comment *github.IssueComment) (*github.IssueComment, *github.Response, error)
 
-	ListByOrg(ctx context.Context, owner string, opts *github.RepositoryListByOrgOptions) ([]*github.Repository, *github.Response, error)
+	//ListByOrg(ctx context.Context, owner string, opts *github.RepositoryListByOrgOptions) ([]*github.Repository, *github.Response, error)
+	List(ctx context.Context, owner string, opts *github.RepositoryListOptions) ([]*github.Repository, *github.Response, error)
 }
 
 type credentialdiggerUtils interface {
@@ -145,8 +146,8 @@ func runCredentialdiggerTestStep(ctx context.Context, config *credentialdiggerTe
 	//log.Entry().Debugf("New issue comment created for issue %v: %v", config.Number, newcomment)
 
 	// List reposIssues
-	opt := &github.RepositoryListByOrgOptions{Type: "public"}
-	repos, resp, err := service.ListByOrg(ctx, owner, opt)
+	opt := &github.RepositoryListOptions{Type: "public"}
+	repos, resp, err := service.List(ctx, owner, opt)
 	if err != nil {
 		log.Entry().Errorf("GitHub response code %v", resp.Status)
 		return errors.Wrapf(err, "Error occurred when listing repos of owner %v", owner)
