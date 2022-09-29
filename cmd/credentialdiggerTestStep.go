@@ -61,11 +61,11 @@ func credentialdiggerTestStep(config credentialdiggerTestStepOptions, telemetryD
 	if err2 != nil {
 		log.Entry().WithError(err2).Fatal("Failed to run custom function")
 	}
-	//err3 := runTestFullScan(&config, telemetryData) // full scan a repo with CD
-	err3 := runTestShell(&config, telemetryData) // Run bash script
-	if err3 != nil {
-		log.Entry().WithError(err3).Fatal("Failed to run full scan")
-	}
+	////err3 := runTestFullScan(&config, telemetryData) // full scan a repo with CD
+	//err3 := runTestShell(&config, telemetryData) // Run bash script
+	//if err3 != nil {
+	//	log.Entry().WithError(err3).Fatal("Failed to run full scan")
+	//}
 }
 
 func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) error {
