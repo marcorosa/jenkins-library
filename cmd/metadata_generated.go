@@ -49,7 +49,7 @@ func GetAllStepMetadata() map[string]config.StepData {
 		"codeqlExecuteScan":                         codeqlExecuteScanMetadata(),
 		"containerExecuteStructureTests":            containerExecuteStructureTestsMetadata(),
 		"containerSaveImage":                        containerSaveImageMetadata(),
-		"credentialdiggerScanPullRequest":           credentialdiggerScanPullRequestMetadata(),
+		"credentialdiggerScan":                      credentialdiggerScanMetadata(),
 		"detectExecuteScan":                         detectExecuteScanMetadata(),
 		"fortifyExecuteScan":                        fortifyExecuteScanMetadata(),
 		"gaugeExecuteTests":                         gaugeExecuteTestsMetadata(),
