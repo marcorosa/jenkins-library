@@ -1,17 +1,28 @@
 package cmd
 
 import (
-	"fmt"
+	"context"
+	"strconv"
+
 	"github.com/SAP/jenkins-library/pkg/command"
-	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
+
+	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
+	"github.com/google/go-github/v45/github"
 )
 
-type credentialdiggerScanUtils interface {
+const piperDbName string = "piper_step_db.db"
+const piperReportName string = "findings.csv"
+
+type credentialdiggerScanService interface {
+	List(ctx context.Context, owner string, opts *github.RepositoryListOptions) ([]*github.Repository, *github.Response, error)
+}
+
+type credentialdiggerUtils interface {
 	command.ExecRunner
 
-	FileExists(filename string) (bool, error)
+	piperutils.FileUtils
 
 	// Add more methods here, or embed additional interfaces, or remove/replace as required.
 	// The credentialdiggerScanUtils interface should be descriptive of your runtime dependencies,
@@ -19,7 +30,7 @@ type credentialdiggerScanUtils interface {
 	// Unit tests shall be executable in parallel (not depend on global state), and don't (re-)test dependencies.
 }
 
-type credentialdiggerScanUtilsBundle struct {
+type credentialdiggerUtilsBundle struct {
 	*command.Command
 	*piperutils.Files
 
@@ -29,8 +40,8 @@ type credentialdiggerScanUtilsBundle struct {
 	// credentialdiggerScanUtilsBundle and forward to the implementation of the dependency.
 }
 
-func newCredentialdiggerScanUtils() credentialdiggerScanUtils {
-	utils := credentialdiggerScanUtilsBundle{
+func newCDUtils() credentialdiggerUtils {
+	utils := credentialdiggerUtilsBundle{
 		Command: &command.Command{},
 		Files:   &piperutils.Files{},
 	}
@@ -41,38 +52,100 @@ func newCredentialdiggerScanUtils() credentialdiggerScanUtils {
 }
 
 func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *telemetry.CustomData) {
-	// Utils can be used wherever the command.ExecRunner interface is expected.
-	// It can also be used for example as a mavenExecRunner.
-	utils := newCredentialdiggerScanUtils()
-
-	// For HTTP calls import  piperhttp "github.com/SAP/jenkins-library/pkg/http"
-	// and use a  &piperhttp.Client{} in a custom system
-	// Example: step checkmarxExecuteScan.go
-
-	// Error situations should be bubbled up until they reach the line below which will then stop execution
-	// through the log.Entry().Fatal() call leading to an os.Exit(1) in the end.
-	err := runCredentialdiggerScan(&config, telemetryData, utils)
+	err := runTestScanPR(&config, telemetryData) // scan PR with CD
 	if err != nil {
-		log.Entry().WithError(err).Fatal("step execution failed")
+		log.Entry().WithError(err).Fatal("Failed to run custom function")
 	}
 }
 
-func runCredentialdiggerScan(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, utils credentialdiggerScanUtils) error {
-	log.Entry().WithField("LogField", "Log field content").Info("This is just a demo for a simple step.")
+func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) error {
+	return utils.RunExecutable("credentialdigger", args...)
+}
 
-	// Example of calling methods from external dependencies directly on utils:
-	exists, err := utils.FileExists("file.txt")
+func runTestScanPR(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData) error {
+	service := newCDUtils()
+	// 1
+	log.Entry().Info("Load rules")
+	cmd_list := []string{"add_rules", "--sqlite", piperDbName, "/credential-digger-ui/backend/rules.yml"}
+	err := executeCredentialDiggerProcess(service, cmd_list)
 	if err != nil {
-		// It is good practice to set an error category.
-		// Most likely you want to do this at the place where enough context is known.
-		log.SetErrorCategory(log.ErrorConfiguration)
-		// Always wrap non-descriptive errors to enrich them with context for when they appear in the log:
-		return fmt.Errorf("failed to check for important file: %w", err)
+		log.Entry().Error("failed running credentialdigger add_rules")
+		return err
 	}
-	if !exists {
-		log.SetErrorCategory(log.ErrorConfiguration)
-		return fmt.Errorf("cannot run without important file")
+	log.Entry().Info("Rules added")
+
+	// 2
+	log.Entry().Info("Scan PR")
+	log.Entry().Info("Scan PR ", config.PrNumber, " from repo ", config.Repository)
+	log.Entry().Infof("  Token: '%s'", config.Token)
+	cmd_list = []string{"scan_pr", config.Repository, "--sqlite", piperDbName,
+		"--pr", strconv.Itoa(config.PrNumber),
+		"--debug",
+		"--force",
+		"--api_endpoint", config.APIURL,
+		"--git_token", config.Token}
+	leaks := executeCredentialDiggerProcess(service, cmd_list)
+	if leaks != nil {
+		log.Entry().Warn("The scan found potential leaks in this PR")
+		// log.Entry().Warn("%v potential leaks found", leaks)
+	} else {
+		log.Entry().Info("No leaks found")
+		// There is no need to print the discoveries if there are none
+		return nil
 	}
+
+	// 3
+	log.Entry().Info("Get discoveries")
+	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperDbName,
+		"--state", "new",
+		"--save", piperReportName}
+	err = executeCredentialDiggerProcess(service, cmd_list)
+	if err != nil {
+		log.Entry().Error("failed running credentialdigger get_discoveries")
+		return err
+	}
+	log.Entry().Info("Scan complete")
 
 	return nil
 }
+
+//func runTestFullScan(config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) error {
+//	service := newCDUtils()
+//	// 1
+//	log.Entry().Info("Load rules")
+//	cmd_list := []string{"add_rules", "--sqlite", piperTempDbName, "/credential-digger-ui/backend/rules.yml"}
+//	err := executeCredentialDiggerProcess(service, cmd_list)
+//	if err != nil {
+//		log.Entry().Error("failed running credentialdigger add_rules")
+//		return err
+//	}
+//	log.Entry().Info("Rules added")
+//	// 2
+//	log.Entry().Info("Scan Repository ", config.Repository)
+//	cmd_list = []string{"scan", config.Repository, "--sqlite", piperTempDbName,
+//		"--debug",
+//		"--force",
+//		"--git_token", config.Token}
+//	leaks := executeCredentialDiggerProcess(service, cmd_list)
+//	if leaks != nil {
+//		log.Entry().Warn("The scan found potential leaks")
+//		log.Entry().Warnf("%v potential leaks found", leaks)
+//	} else {
+//		log.Entry().Info("No leaks found")
+//		// There is no need to print the discoveries if there are none
+//		return nil
+//	}
+//	// 3
+//	log.Entry().Info("Get discoveries")
+//	cmd_list = []string{"get_discoveries", config.Repository, "--sqlite", piperTempDbName,
+//		"--state", "new",
+//		"--save", piperReportTempName}
+//	err = executeCredentialDiggerProcess(service, cmd_list)
+//	if err != nil {
+//		log.Entry().Error("failed running credentialdigger get_discoveries")
+//		return err
+//	}
+//	log.Entry().Info("Scan complete")
+//
+//	return nil
+//}
