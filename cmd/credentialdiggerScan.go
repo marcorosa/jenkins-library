@@ -66,11 +66,11 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 	// Choose between scan-snapshot, scan-pr, and full-scan (with this priority
 	// order)
 	switch {
-	case &config.Snapshot != nil:
+	case config.Snapshot != "":
 		log.Entry().Debug("Scan snapshot")
 		// if a Snapshot is declared, run scan_snapshot
 		// TODO
-	case &config.PrNumber != nil: // int type is not nillable in golang
+	case config.PrNumber != 0: // int type is not nillable in golang
 		log.Entry().Debug("Scan PR")
 		// if a PrNumber is declared, run scan_pr
 		err = runTestScanPR(&config, telemetryData, &utils) // scan PR with CD
