@@ -138,13 +138,7 @@ func credentialdiggerBuildCommonArgs(config *credentialdiggerScanOptions) []stri
 }
 
 func credentialdiggerScanPR(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
-	log.Entry().Infof("Scan PR ", config.PrNumber, " from repo ", config.Repository)
-	//cmd_list := []string{"scan_pr", config.Repository, "--sqlite", piperDbName,
-	//	"--pr", strconv.Itoa(config.PrNumber),
-	//	"--debug",
-	//	"--force",
-	//	"--api_endpoint", config.APIURL,
-	//	"--git_token", config.Token}
+	log.Entry().Infof("Scan PR %v from repo %v", config.PrNumber, config.Repository)
 	cmd_list := []string{"scan_pr",
 		"--pr", strconv.Itoa(config.PrNumber),
 		"--api_endpoint", config.APIURL}
