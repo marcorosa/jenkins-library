@@ -79,13 +79,20 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 		log.Entry().Debug("Full scan repo")
 		err = credentialdiggerFullScan(&config, telemetryData, &utils) // full scan with CD
 	}
+	// err is an error exit number when there are findings
+	if err == nil {
+		log.Entry().Info("No discoveries found in this repo")
+		// If there are no findings, there is no need to export an empty report
+		return nil
+	}
 
 	// 3: Get discoveries
 	err = credentialdiggerGetDiscoveries(&config, telemetryData, &utils)
 	if err != nil {
 		// The exit number is the number of discoveries
+		// Therefore, this error is not relevant, if raised
 		//log.Entry().WithError(err).Fatal("Failed to run custom function")
-		log.Entry().Errorf("There are %v findings to review", err)
+		log.Entry().Warn("There are findings to review")
 	}
 
 	return nil
