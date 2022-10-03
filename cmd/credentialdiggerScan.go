@@ -103,11 +103,15 @@ func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData
 func credentialdiggerGetDiscoveries(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
 	log.Entry().Info("Get discoveries")
 	cmd_list := []string{"get_discoveries", config.Repository, "--sqlite", piperDbName,
-		"--state", "new",
 		"--save", piperReportName}
+	// Export all the discoveries or export only new ones
+	if !config.ExportAll {
+		cmd_list = append(cmd_list, "--state", "new")
+	}
 	err := executeCredentialDiggerProcess(*service, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
+		log.Entry().Error(err)
 		return err
 	}
 	log.Entry().Info("Scan complete")
