@@ -73,7 +73,7 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 	case config.PrNumber != 0: // int type is not nillable in golang
 		log.Entry().Debug("Scan PR")
 		// if a PrNumber is declared, run scan_pr
-		err = runTestScanPR(&config, telemetryData, &utils) // scan PR with CD
+		err = credentialdiggerScanPR(&config, telemetryData, &utils) // scan PR with CD
 	default:
 		// The default case is the normal full scan
 		log.Entry().Debug("Full scan repo")
@@ -114,14 +114,41 @@ func credentialdiggerGetDiscoveries(config *credentialdiggerScanOptions, telemet
 	return nil
 }
 
-func runTestScanPR(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
+func credentialdiggerBuildCommonArgs(config *credentialdiggerScanOptions) []string {
+	scan_args := []string{}
+	// Repository url and sqlite db (always mandatory)
+	scan_args = append(scan_args, config.Repository, "--sqlite", piperDbName)
+	//git token is not mandatory for base credential digger tool, but i
+	//piper it is
+	scan_args = append(scan_args, config.Token)
+	//debug
+	if config.Debug {
+		log.Entry().Debug("Run the scan in debug mode")
+		scan_args = append(scan_args, "--debug")
+	}
+	//models
+	// TODO
+	if config.Models != nil {
+		log.Entry().Debugf("Enable models %v", config.Models)
+		scan_args = append(scan_args, "--models")
+		scan_args = append(scan_args, config.Models...)
+	}
+
+	return scan_args
+}
+
+func credentialdiggerScanPR(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
 	log.Entry().Infof("Scan PR ", config.PrNumber, " from repo ", config.Repository)
-	cmd_list := []string{"scan_pr", config.Repository, "--sqlite", piperDbName,
+	//cmd_list := []string{"scan_pr", config.Repository, "--sqlite", piperDbName,
+	//	"--pr", strconv.Itoa(config.PrNumber),
+	//	"--debug",
+	//	"--force",
+	//	"--api_endpoint", config.APIURL,
+	//	"--git_token", config.Token}
+	cmd_list := []string{"scan_pr",
 		"--pr", strconv.Itoa(config.PrNumber),
-		"--debug",
-		"--force",
-		"--api_endpoint", config.APIURL,
-		"--git_token", config.Token}
+		"--api_endpoint", config.APIURL}
+	cmd_list = credentialdiggerBuildCommonArgs(config)
 	leaks := executeCredentialDiggerProcess(*service, cmd_list)
 	if leaks != nil {
 		log.Entry().Warn("The scan found potential leaks in this PR")
@@ -131,8 +158,12 @@ func runTestScanPR(config *credentialdiggerScanOptions, telemetryData *telemetry
 		return nil
 	}
 }
+func credentialdiggerScanSnapshot(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
+	// TODO
+	return nil
+}
 
-//func runTestFullScan(config *credentialdiggerTestStepOptions, telemetryData *telemetry.CustomData) error {
+//func credentialdiggerFullScan(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
 //	service := newCDUtils()
 //	// 1
 //	log.Entry().Info("Load rules")
