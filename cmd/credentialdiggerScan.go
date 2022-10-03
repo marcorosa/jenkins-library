@@ -118,9 +118,9 @@ func credentialdiggerBuildCommonArgs(config *credentialdiggerScanOptions) []stri
 	scan_args := []string{}
 	// Repository url and sqlite db (always mandatory)
 	scan_args = append(scan_args, config.Repository, "--sqlite", piperDbName)
-	//git token is not mandatory for base credential digger tool, but i
+	//git token is not mandatory for base credential digger tool, but in
 	//piper it is
-	scan_args = append(scan_args, config.Token)
+	scan_args = append(scan_args, "--git_token", config.Token)
 	//debug
 	if config.Debug {
 		log.Entry().Debug("Run the scan in debug mode")
