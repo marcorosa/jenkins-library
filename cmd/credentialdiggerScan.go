@@ -133,7 +133,7 @@ func credentialdiggerBuildCommonArgs(config *credentialdiggerScanOptions) []stri
 		scan_args = append(scan_args, "--debug")
 	}
 	//models
-	if config.Models != nil {
+	if len(config.Models) > 0 {
 		log.Entry().Debugf("Enable models %v", config.Models)
 		scan_args = append(scan_args, "--models")
 		scan_args = append(scan_args, config.Models...)
