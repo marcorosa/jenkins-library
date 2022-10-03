@@ -83,8 +83,9 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 	// 3: Get discoveries
 	err = credentialdiggerGetDiscoveries(&config, telemetryData, &utils)
 	if err != nil {
-		log.Entry().WithError(err).Fatal("Failed to run custom function")
-		log.Entry().Errorf("%v", err)
+		// The exit number is the number of discoveries
+		//log.Entry().WithError(err).Fatal("Failed to run custom function")
+		log.Entry().Errorf("There are %v findings to review", err)
 	}
 
 	return nil
