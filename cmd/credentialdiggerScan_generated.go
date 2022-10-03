@@ -21,6 +21,7 @@ type credentialdiggerScanOptions struct {
 	PrNumber   int      `json:"prNumber,omitempty"`
 	ExportAll  bool     `json:"exportAll,omitempty"`
 	APIURL     string   `json:"apiUrl,omitempty"`
+	Debug      bool     `json:"debug,omitempty"`
 	Models     []string `json:"models,omitempty"`
 	Token      string   `json:"token,omitempty"`
 }
@@ -127,6 +128,7 @@ func addCredentialdiggerScanFlags(cmd *cobra.Command, stepConfig *credentialdigg
 	cmd.Flags().IntVar(&stepConfig.PrNumber, "prNumber", 0, "If set, scan the pull request open with this number.")
 	cmd.Flags().BoolVar(&stepConfig.ExportAll, "exportAll", false, "Export all the findings, i.e., including non-leaks.")
 	cmd.Flags().StringVar(&stepConfig.APIURL, "apiUrl", `https://api.github.com`, "Set the GitHub API url. Needed for scanning a pull request.")
+	cmd.Flags().BoolVar(&stepConfig.Debug, "debug", false, "Execute the scans in debug mode (i.e., print logs).")
 	cmd.Flags().StringSliceVar(&stepConfig.Models, "models", []string{}, "Machine learning models to automatically verify the findings.")
 	cmd.Flags().StringVar(&stepConfig.Token, "token", os.Getenv("PIPER_token"), "GitHub personal access token as per https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line")
 
@@ -193,6 +195,15 @@ func credentialdiggerScanMetadata() config.StepData {
 						Mandatory:   true,
 						Aliases:     []config.Alias{{Name: "githubApiUrl"}},
 						Default:     `https://api.github.com`,
+					},
+					{
+						Name:        "debug",
+						ResourceRef: []config.ResourceReference{},
+						Scope:       []string{"GENERAL", "PARAMETERS", "STAGES", "STEPS"},
+						Type:        "bool",
+						Mandatory:   false,
+						Aliases:     []config.Alias{{Name: "verbose"}},
+						Default:     false,
 					},
 					{
 						Name:        "models",
