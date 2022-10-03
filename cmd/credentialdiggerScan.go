@@ -148,7 +148,7 @@ func credentialdiggerScanPR(config *credentialdiggerScanOptions, telemetryData *
 	cmd_list := []string{"scan_pr",
 		"--pr", strconv.Itoa(config.PrNumber),
 		"--api_endpoint", config.APIURL}
-	cmd_list = credentialdiggerBuildCommonArgs(config)
+	cmd_list = append(cmd_list, credentialdiggerBuildCommonArgs(config)...)
 	leaks := executeCredentialDiggerProcess(*service, cmd_list)
 	if leaks != nil {
 		log.Entry().Warn("The scan found potential leaks in this PR")
