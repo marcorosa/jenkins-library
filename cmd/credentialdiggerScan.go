@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
@@ -23,21 +24,11 @@ type credentialdiggerUtils interface {
 	command.ExecRunner
 
 	piperutils.FileUtils
-
-	// Add more methods here, or embed additional interfaces, or remove/replace as required.
-	// The credentialdiggerScanUtils interface should be descriptive of your runtime dependencies,
-	// i.e. include everything you need to be able to mock in tests.
-	// Unit tests shall be executable in parallel (not depend on global state), and don't (re-)test dependencies.
 }
 
 type credentialdiggerUtilsBundle struct {
 	*command.Command
 	*piperutils.Files
-
-	// Embed more structs as necessary to implement methods or interfaces you add to credentialdiggerScanUtils.
-	// Structs embedded in this way must each have a unique set of methods attached.
-	// If there is no struct which implements the method you need, attach the method to
-	// credentialdiggerScanUtilsBundle and forward to the implementation of the dependency.
 }
 
 func newCDUtils() credentialdiggerUtils {
@@ -91,9 +82,13 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 	if err != nil {
 		// The exit number is the number of discoveries
 		// Therefore, this error is not relevant, if raised
-		//log.Entry().WithError(err).Fatal("Failed to run custom function")
 		log.Entry().Warn("There are findings to review")
 	}
+
+	// 4: Export report in workspace
+	reports := []piperutils.Path{}
+	reports = append(reports, piperutils.Path{Target: fmt.Sprintf("%v", piperReportName)})
+	piperutils.PersistReportsAndLinks("credentialdiggerScan", "./", utils, reports, nil)
 
 	return nil
 }
