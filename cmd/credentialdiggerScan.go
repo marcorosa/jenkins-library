@@ -5,9 +5,9 @@ import (
 	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
-	"github.com/SAP/jenkins-library/pkg/piperutils"
-
+	piperhttp "github.com/SAP/jenkins-library/pkg/http"
 	"github.com/SAP/jenkins-library/pkg/log"
+	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
 )
 
@@ -16,7 +16,6 @@ const piperReportName string = "findings.csv"
 
 type credentialdiggerUtils interface {
 	command.ExecRunner
-
 	piperutils.FileUtils
 }
 
@@ -92,8 +91,16 @@ func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) 
 }
 
 func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
-	// TODO: implement custom rules support
-	cmd_list := []string{"add_rules", "--sqlite", piperDbName, "/credential-digger-ui/backend/rules.yml"}
+	// Set the rule file to the standard ruleset shipped withing credential
+	// digger
+	ruleFile := "/credential-digger-ui/backend/rules.yml"
+	if config.RulesDownloadURL != "" {
+		// Download custom rule file from this URL
+		dlClient := piperhttp.Client{}
+		ruleFile = "/credential-digger-ui/backend/custom-rules.yml"
+		dlClient.DownloadFile(config.RulesDownloadURL, ruleFile, nil, nil)
+	}
+	cmd_list := []string{"add_rules", "--sqlite", piperDbName, ruleFile}
 	return executeCredentialDiggerProcess(*service, cmd_list)
 }
 
