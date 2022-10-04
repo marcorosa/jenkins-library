@@ -96,9 +96,12 @@ func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData
 	ruleFile := "/credential-digger-ui/backend/rules.yml"
 	if config.RulesDownloadURL != "" {
 		// Download custom rule file from this URL
+		log.Entry().Debugf("Download custom ruleset from %v", config.RulesDownloadURL)
 		dlClient := piperhttp.Client{}
 		ruleFile = "/credential-digger-ui/backend/custom-rules.yml"
 		dlClient.DownloadFile(config.RulesDownloadURL, ruleFile, nil, nil)
+	} else {
+		log.Entry().Debug("Use standard ruleset")
 	}
 	cmd_list := []string{"add_rules", "--sqlite", piperDbName, ruleFile}
 	return executeCredentialDiggerProcess(*service, cmd_list)
