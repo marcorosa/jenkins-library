@@ -16,14 +16,15 @@ import (
 )
 
 type credentialdiggerScanOptions struct {
-	Repository string   `json:"repository,omitempty"`
-	Snapshot   string   `json:"snapshot,omitempty"`
-	PrNumber   int      `json:"prNumber,omitempty"`
-	ExportAll  bool     `json:"exportAll,omitempty"`
-	APIURL     string   `json:"apiUrl,omitempty"`
-	Debug      bool     `json:"debug,omitempty"`
-	Models     []string `json:"models,omitempty"`
-	Token      string   `json:"token,omitempty"`
+	Repository       string   `json:"repository,omitempty"`
+	Snapshot         string   `json:"snapshot,omitempty"`
+	PrNumber         int      `json:"prNumber,omitempty"`
+	ExportAll        bool     `json:"exportAll,omitempty"`
+	APIURL           string   `json:"apiUrl,omitempty"`
+	Debug            bool     `json:"debug,omitempty"`
+	RulesDownloadURL string   `json:"rulesDownloadUrl,omitempty"`
+	Models           []string `json:"models,omitempty"`
+	Token            string   `json:"token,omitempty"`
 }
 
 // CredentialdiggerScanCommand Scan a repository on GitHub with Credential Digger
@@ -129,6 +130,7 @@ func addCredentialdiggerScanFlags(cmd *cobra.Command, stepConfig *credentialdigg
 	cmd.Flags().BoolVar(&stepConfig.ExportAll, "exportAll", false, "Export all the findings, i.e., including non-leaks.")
 	cmd.Flags().StringVar(&stepConfig.APIURL, "apiUrl", `https://api.github.com`, "Set the GitHub API url. Needed for scanning a pull request.")
 	cmd.Flags().BoolVar(&stepConfig.Debug, "debug", false, "Execute the scans in debug mode (i.e., print logs).")
+	cmd.Flags().StringVar(&stepConfig.RulesDownloadURL, "rulesDownloadUrl", os.Getenv("PIPER_rulesDownloadUrl"), "URL where to download custom rules. The file published at this URL must be formatted as the default ruleset https://raw.githubusercontent.com/SAP/credential-digger/main/ui/backend/rules.yml")
 	cmd.Flags().StringSliceVar(&stepConfig.Models, "models", []string{}, "Machine learning models to automatically verify the findings.")
 	cmd.Flags().StringVar(&stepConfig.Token, "token", os.Getenv("PIPER_token"), "GitHub personal access token as per https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line")
 
@@ -206,6 +208,15 @@ func credentialdiggerScanMetadata() config.StepData {
 						Default:     false,
 					},
 					{
+						Name:        "rulesDownloadUrl",
+						ResourceRef: []config.ResourceReference{},
+						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
+						Type:        "string",
+						Mandatory:   false,
+						Aliases:     []config.Alias{},
+						Default:     os.Getenv("PIPER_rulesDownloadUrl"),
+					},
+					{
 						Name:        "models",
 						ResourceRef: []config.ResourceReference{},
 						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
@@ -238,6 +249,17 @@ func credentialdiggerScanMetadata() config.StepData {
 			},
 			Containers: []config.Container{
 				{Image: "credentialdigger.int.repositories.cloud.sap/credential_digger:4.9.2"},
+			},
+			Outputs: config.StepOutputs{
+				Resources: []config.StepResources{
+					{
+						Name: "report",
+						Type: "report",
+						Parameters: []map[string]interface{}{
+							{"filePattern": "**/report*.csv", "type": "credentialdigger-report"},
+						},
+					},
+				},
 			},
 		},
 	}
