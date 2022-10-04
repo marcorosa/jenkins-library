@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
@@ -94,6 +95,14 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 		//log.Entry().WithError(err).Fatal("Failed to run custom function")
 		log.Entry().Warn("There are findings to review")
 	}
+
+	// 4: Export report
+	// TODO
+
+	reports := []piperutils.Path{}
+	reports = append(reports, piperutils.Path{Target: fmt.Sprintf("%v", piperReportName)})
+
+	piperutils.PersistReportsAndLinks("credentialdiggerScan", "./", utils, reports, nil)
 
 	return nil
 }
