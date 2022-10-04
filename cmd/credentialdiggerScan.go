@@ -79,12 +79,20 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 		log.Entry().Debug("Full scan repo")
 		err = credentialdiggerFullScan(&config, telemetryData, &utils) // full scan with CD
 	}
+	// err is an error exit number when there are findings
+	if err == nil {
+		log.Entry().Info("No discoveries found in this repo")
+		// If there are no findings, there is no need to export an empty report
+		return nil
+	}
 
 	// 3: Get discoveries
 	err = credentialdiggerGetDiscoveries(&config, telemetryData, &utils)
 	if err != nil {
-		log.Entry().WithError(err).Fatal("Failed to run custom function")
-		log.Entry().Errorf("%v", err)
+		// The exit number is the number of discoveries
+		// Therefore, this error is not relevant, if raised
+		//log.Entry().WithError(err).Fatal("Failed to run custom function")
+		log.Entry().Warn("There are findings to review")
 	}
 
 	return nil
@@ -103,11 +111,15 @@ func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData
 func credentialdiggerGetDiscoveries(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service *credentialdiggerUtils) error {
 	log.Entry().Info("Get discoveries")
 	cmd_list := []string{"get_discoveries", config.Repository, "--sqlite", piperDbName,
-		"--state", "new",
 		"--save", piperReportName}
+	// Export all the discoveries or export only new ones
+	if !config.ExportAll {
+		cmd_list = append(cmd_list, "--state", "new")
+	}
 	err := executeCredentialDiggerProcess(*service, cmd_list)
 	if err != nil {
 		log.Entry().Error("failed running credentialdigger get_discoveries")
+		log.Entry().Error(err)
 		return err
 	}
 	log.Entry().Info("Scan complete")
@@ -129,7 +141,7 @@ func credentialdiggerBuildCommonArgs(config *credentialdiggerScanOptions) []stri
 		scan_args = append(scan_args, "--debug")
 	}
 	//models
-	if config.Models != nil {
+	if len(config.Models) > 0 {
 		log.Entry().Debugf("Enable models %v", config.Models)
 		scan_args = append(scan_args, "--models")
 		scan_args = append(scan_args, config.Models...)
