@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 
@@ -10,15 +9,10 @@ import (
 
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
-	"github.com/google/go-github/v45/github"
 )
 
 const piperDbName string = "piper_step_db.db"
 const piperReportName string = "findings.csv"
-
-type credentialdiggerScanService interface {
-	List(ctx context.Context, owner string, opts *github.RepositoryListOptions) ([]*github.Repository, *github.Response, error)
-}
 
 type credentialdiggerUtils interface {
 	command.ExecRunner
