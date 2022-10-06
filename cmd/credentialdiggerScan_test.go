@@ -35,6 +35,7 @@ func TestCredentialdiggerFullScan(t *testing.T) {
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken"}
 		utils := newCDTestsUtils()
 		assert.Equal(t, 0, credentialdiggerFullScan(&config, nil, utils))
+
 	})
 	t.Run("Full scan with discoveries or wrong arguments", func(t *testing.T) {
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken"}
@@ -118,5 +119,15 @@ func TestCredentialdiggerBuildCommonArgs(t *testing.T) {
 			Models: []string{"model1", "model2"},
 		}
 		assert.Equal(t, arguments, credentialdiggerBuildCommonArgs(&config))
+	})
+
+}
+
+func TestCredentialdiggerGetDiscoveries(t *testing.T) {
+	t.Run("Valid get discoveries", func(t *testing.T) {
+		// TODO
+	})
+	t.Run("Empty discoveries", func(t *testing.T) {
+		// TODO
 	})
 }
