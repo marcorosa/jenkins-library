@@ -296,7 +296,4 @@ spec:
                 type: int
   containers:
     - name: sonar
-      image: sonarsource/sonar-scanner-cli:4.7
-      options:
-        - name: -u
-          value: "0"
+      image: sonarsource/sonar-scanner-cli:4.6
