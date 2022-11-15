@@ -7,6 +7,7 @@ import (
 	"github.com/SAP/jenkins-library/pkg/command"
 	piperhttp "github.com/SAP/jenkins-library/pkg/http"
 	"github.com/SAP/jenkins-library/pkg/log"
+	"github.com/SAP/jenkins-library/pkg/orchestrator"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
 )
@@ -37,6 +38,22 @@ func newCDUtils() credentialdiggerUtils {
 
 func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *telemetry.CustomData) error {
 	utils := newCDUtils()
+	// 0: Get attributes from orchestrator
+	provider, prov_err := orchestrator.NewOrchestratorSpecificConfigProvider()
+	if prov_err != nil {
+		log.Entry().WithError(prov_err).Error("Error with Credential Digger orchestrator.")
+	}
+	if config.Repository == "" {
+		// Get current repository
+		config.Repository = provider.GetRepoURL()
+		log.Entry().Debug("Use current repository: ", config.Repository)
+	}
+	if provider.IsPullRequest() {
+		// set the pr number
+		config.PrNumber = provider.GetChangeSet()[0].PrNumber
+		log.Entry().Debug("Scan the current pull request: number ", config.PrNumber)
+	}
+
 	// 1: Add rules
 	log.Entry().Info("Load rules")
 	err := credentialdiggerAddRules(&config, telemetryData, utils)
@@ -47,17 +64,17 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 	log.Entry().Info("Rules added")
 
 	// 2: Scan the repository
-	// Choose between scan-snapshot, scan-pr, and full-scan (with this priority
+	// Choose between scan-pr, scan-snapshot, and full-scan (with this priority
 	// order)
 	switch {
-	case config.Snapshot != "":
-		log.Entry().Debug("Scan snapshot")
-		// if a Snapshot is declared, run scan_snapshot
-		err = credentialdiggerScanSnapshot(&config, telemetryData, utils) // scan Snapshot with CD
 	case config.PrNumber != 0: // int type is not nillable in golang
 		log.Entry().Debug("Scan PR")
 		// if a PrNumber is declared, run scan_pr
 		err = credentialdiggerScanPR(&config, telemetryData, utils) // scan PR with CD
+	case config.Snapshot != "":
+		log.Entry().Debug("Scan snapshot")
+		// if a Snapshot is declared, run scan_snapshot
+		err = credentialdiggerScanSnapshot(&config, telemetryData, utils) // scan Snapshot with CD
 	default:
 		// The default case is the normal full scan
 		log.Entry().Debug("Full scan repo")

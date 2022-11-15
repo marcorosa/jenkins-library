@@ -32,7 +32,6 @@ func (c credentialdiggerScanMockUtils) RunExecutable(executable string, params .
 
 func TestCredentialdiggerFullScan(t *testing.T) {
 	t.Run("Valid full scan without discoveries", func(t *testing.T) {
-		// TODO
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken"}
 		utils := newCDTestsUtils()
 		assert.Equal(t, 0, credentialdiggerFullScan(&config, nil, utils))

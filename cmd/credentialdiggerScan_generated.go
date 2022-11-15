@@ -134,7 +134,6 @@ func addCredentialdiggerScanFlags(cmd *cobra.Command, stepConfig *credentialdigg
 	cmd.Flags().StringSliceVar(&stepConfig.Models, "models", []string{}, "Machine learning models to automatically verify the findings.")
 	cmd.Flags().StringVar(&stepConfig.Token, "token", os.Getenv("PIPER_token"), "GitHub personal access token as per https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line")
 
-	cmd.MarkFlagRequired("repository")
 	cmd.MarkFlagRequired("apiUrl")
 	cmd.MarkFlagRequired("token")
 }
@@ -158,7 +157,7 @@ func credentialdiggerScanMetadata() config.StepData {
 						ResourceRef: []config.ResourceReference{},
 						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
 						Type:        "string",
-						Mandatory:   true,
+						Mandatory:   false,
 						Aliases:     []config.Alias{{Name: "githubRepo"}},
 						Default:     os.Getenv("PIPER_repository"),
 					},
