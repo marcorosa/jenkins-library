@@ -124,7 +124,7 @@ It supports several scan flavors, i.e., full scans of a repo, scan of a snapshot
 }
 
 func addCredentialdiggerScanFlags(cmd *cobra.Command, stepConfig *credentialdiggerScanOptions) {
-	cmd.Flags().StringVar(&stepConfig.Repository, "repository", os.Getenv("PIPER_repository"), "URL of the GitHub repository. (was name, but we need the url)")
+	cmd.Flags().StringVar(&stepConfig.Repository, "repository", os.Getenv("PIPER_repository"), "URL of the GitHub repository (was name, but we need the url). In case it's missing, use the URL of the current repository.")
 	cmd.Flags().StringVar(&stepConfig.Snapshot, "snapshot", os.Getenv("PIPER_snapshot"), "If set, scan the snapshot of the repository at this commit_id/branch.")
 	cmd.Flags().IntVar(&stepConfig.PrNumber, "prNumber", 0, "If set, scan the pull request open with this number.")
 	cmd.Flags().BoolVar(&stepConfig.ExportAll, "exportAll", false, "Export all the findings, i.e., including non-leaks.")
