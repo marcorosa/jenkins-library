@@ -45,15 +45,16 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 		log.Entry().WithError(prov_err).Error("Error with Credential Digger orchestrator.")
 	}
 	if config.Repository == "" {
-		// Get current repository
-		config.Repository = provider.GetRepoURL()
-		log.Entry().Debug("Use current repository: ", config.Repository)
-		if config.Repository == "n//a" {
+		// Get current repository from orchestrator
+		repoUrlOrchestrator := provider.GetRepoURL()
+		if repoUrlOrchestrator == "n/a" {
 			// Jenkins configuration error
 			log.Entry().WithError(errors.New(
-				fmt.Sprintf("Unknown repository URL %s", config.Repository))).Error(
+				fmt.Sprintf("Unknown repository URL %s", repoUrlOrchestrator))).Error(
 				"Repository URL n/a. Please verify git plugin is installed.")
 		}
+		config.Repository = repoUrlOrchestrator
+		log.Entry().Debug("Use current repository: ", repoUrlOrchestrator)
 	}
 	if provider.IsPullRequest() {
 		// set the pr number
