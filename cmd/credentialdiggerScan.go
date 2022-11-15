@@ -48,7 +48,7 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 		// Get current repository
 		config.Repository = provider.GetRepoURL()
 		log.Entry().Debug("Use current repository: ", config.Repository)
-		if config.Repository == "n/a" {
+		if config.Repository == "n//a" {
 			// Jenkins configuration error
 			log.Entry().WithError(errors.New(
 				fmt.Sprintf("Unknown repository URL %s", config.Repository))).Error(
