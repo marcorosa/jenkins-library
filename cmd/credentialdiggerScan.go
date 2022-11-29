@@ -58,7 +58,7 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 	}
 	if provider.IsPullRequest() {
 		// set the pr number
-		config.PrNumber = provider.GetChangeSet()[0].PrNumber
+		config.PrNumber = provider.GetPullRequestConfig().Key
 		log.Entry().Debug("Scan the current pull request: number ", config.PrNumber)
 	}
 
