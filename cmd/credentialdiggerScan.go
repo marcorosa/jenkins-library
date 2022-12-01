@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
@@ -128,14 +130,20 @@ func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) 
 }
 
 func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service credentialdiggerUtils) error {
+	// Credentialdigger home can be changed with local forks (e.g., for local piper runs)
+	cdHome := "/credential-digger-ui" // cdHome as in docker container
+	if cdh := os.Getenv("CREDENTIALDIGGER_HOME"); cdh != "" {
+		cdHome = cdh
+	}
+	log.Entry().Debug("Use credentialdigger home ", cdHome)
 	// Set the rule file to the standard ruleset shipped withing credential
 	// digger
-	ruleFile := "/credential-digger-ui/backend/rules.yml"
+	ruleFile := filepath.Join(cdHome, "backend", "rules.yml")
 	if config.RulesDownloadURL != "" {
 		// Download custom rule file from this URL
 		log.Entry().Debugf("Download custom ruleset from %v", config.RulesDownloadURL)
 		dlClient := piperhttp.Client{}
-		ruleFile = "/credential-digger-ui/backend/custom-rules.yml"
+		ruleFile := filepath.Join(cdHome, "backend", "custom-rules.yml")
 		dlClient.DownloadFile(config.RulesDownloadURL, ruleFile, nil, nil)
 	} else {
 		log.Entry().Debug("Use standard ruleset")
