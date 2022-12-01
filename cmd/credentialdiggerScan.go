@@ -2,13 +2,17 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/SAP/jenkins-library/pkg/command"
 	piperhttp "github.com/SAP/jenkins-library/pkg/http"
 	"github.com/SAP/jenkins-library/pkg/log"
+	"github.com/SAP/jenkins-library/pkg/orchestrator"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/telemetry"
+	"github.com/pkg/errors"
 )
 
 const piperDbName string = "piper_step_db.db"
@@ -37,6 +41,29 @@ func newCDUtils() credentialdiggerUtils {
 
 func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *telemetry.CustomData) error {
 	utils := newCDUtils()
+	// 0: Get attributes from orchestrator
+	provider, prov_err := orchestrator.NewOrchestratorSpecificConfigProvider()
+	if prov_err != nil {
+		log.Entry().WithError(prov_err).Error("Error with Credential Digger orchestrator.")
+	}
+	if config.Repository == "" {
+		// Get current repository from orchestrator
+		repoUrlOrchestrator := provider.GetRepoURL()
+		if repoUrlOrchestrator == "n/a" {
+			// Jenkins configuration error
+			log.Entry().WithError(errors.New(
+				fmt.Sprintf("Unknown repository URL %s", repoUrlOrchestrator))).Error(
+				"Repository URL n/a. Please verify git plugin is installed.")
+		}
+		config.Repository = repoUrlOrchestrator
+		log.Entry().Debug("Use current repository: ", repoUrlOrchestrator)
+	}
+	if provider.IsPullRequest() {
+		// set the pr number
+		config.PrNumber, _ = strconv.Atoi(provider.GetPullRequestConfig().Key)
+		log.Entry().Debug("Scan the current pull request: number ", config.PrNumber)
+	}
+
 	// 1: Add rules
 	log.Entry().Info("Load rules")
 	err := credentialdiggerAddRules(&config, telemetryData, utils)
@@ -47,21 +74,33 @@ func credentialdiggerScan(config credentialdiggerScanOptions, telemetryData *tel
 	log.Entry().Info("Rules added")
 
 	// 2: Scan the repository
-	// Choose between scan-snapshot, scan-pr, and full-scan (with this priority
+	// Choose between scan-pr, scan-snapshot, and full-scan (with this priority
 	// order)
 	switch {
-	case config.Snapshot != "":
-		log.Entry().Debug("Scan snapshot")
-		// if a Snapshot is declared, run scan_snapshot
-		err = credentialdiggerScanSnapshot(&config, telemetryData, utils) // scan Snapshot with CD
 	case config.PrNumber != 0: // int type is not nillable in golang
 		log.Entry().Debug("Scan PR")
 		// if a PrNumber is declared, run scan_pr
 		err = credentialdiggerScanPR(&config, telemetryData, utils) // scan PR with CD
+	case config.Snapshot != "":
+		log.Entry().Debug("Scan snapshot")
+		// if a Snapshot is declared, run scan_snapshot
+		err = credentialdiggerScanSnapshot(&config, telemetryData, utils) // scan Snapshot with CD
 	default:
 		// The default case is the normal full scan
 		log.Entry().Debug("Full scan repo")
 		err = credentialdiggerFullScan(&config, telemetryData, utils) // full scan with CD
+	}
+	// err is an error exit number when there are findings
+	if err == nil {
+		log.Entry().Info("No discoveries found in this repo")
+		// If there are no findings, there is no need to export an empty report
+		return nil
+	}
+	// err is an error exit number when there are findings
+	if err == nil {
+		log.Entry().Info("No discoveries found in this repo")
+		// If there are no findings, there is no need to export an empty report
+		return nil
 	}
 	// err is an error exit number when there are findings
 	if err == nil {
@@ -91,14 +130,20 @@ func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) 
 }
 
 func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service credentialdiggerUtils) error {
+	// Credentialdigger home can be changed with local forks (e.g., for local piper runs)
+	cdHome := "/credential-digger-ui" // cdHome as in docker container
+	if cdh := os.Getenv("CREDENTIALDIGGER_HOME"); cdh != "" {
+		cdHome = cdh
+	}
+	log.Entry().Debug("Use credentialdigger home ", cdHome)
 	// Set the rule file to the standard ruleset shipped withing credential
 	// digger
-	ruleFile := "/credential-digger-ui/backend/rules.yml"
+	ruleFile := filepath.Join(cdHome, "backend", "rules.yml")
 	if config.RulesDownloadURL != "" {
 		// Download custom rule file from this URL
 		log.Entry().Debugf("Download custom ruleset from %v", config.RulesDownloadURL)
 		dlClient := piperhttp.Client{}
-		ruleFile = "/credential-digger-ui/backend/custom-rules.yml"
+		ruleFile := filepath.Join(cdHome, "backend", "custom-rules.yml")
 		dlClient.DownloadFile(config.RulesDownloadURL, ruleFile, nil, nil)
 	} else {
 		log.Entry().Debug("Use standard ruleset")

@@ -124,7 +124,7 @@ It supports several scan flavors, i.e., full scans of a repo, scan of a snapshot
 }
 
 func addCredentialdiggerScanFlags(cmd *cobra.Command, stepConfig *credentialdiggerScanOptions) {
-	cmd.Flags().StringVar(&stepConfig.Repository, "repository", os.Getenv("PIPER_repository"), "URL of the GitHub repository. (was name, but we need the url)")
+	cmd.Flags().StringVar(&stepConfig.Repository, "repository", os.Getenv("PIPER_repository"), "URL of the GitHub repository (was name, but we need the url). In case it's missing, use the URL of the current repository.")
 	cmd.Flags().StringVar(&stepConfig.Snapshot, "snapshot", os.Getenv("PIPER_snapshot"), "If set, scan the snapshot of the repository at this commit_id/branch.")
 	cmd.Flags().IntVar(&stepConfig.PrNumber, "prNumber", 0, "If set, scan the pull request open with this number.")
 	cmd.Flags().BoolVar(&stepConfig.ExportAll, "exportAll", false, "Export all the findings, i.e., including non-leaks.")
@@ -134,7 +134,6 @@ func addCredentialdiggerScanFlags(cmd *cobra.Command, stepConfig *credentialdigg
 	cmd.Flags().StringSliceVar(&stepConfig.Models, "models", []string{}, "Machine learning models to automatically verify the findings.")
 	cmd.Flags().StringVar(&stepConfig.Token, "token", os.Getenv("PIPER_token"), "GitHub personal access token as per https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line")
 
-	cmd.MarkFlagRequired("repository")
 	cmd.MarkFlagRequired("apiUrl")
 	cmd.MarkFlagRequired("token")
 }
@@ -158,7 +157,7 @@ func credentialdiggerScanMetadata() config.StepData {
 						ResourceRef: []config.ResourceReference{},
 						Scope:       []string{"PARAMETERS", "STAGES", "STEPS"},
 						Type:        "string",
-						Mandatory:   true,
+						Mandatory:   false,
 						Aliases:     []config.Alias{{Name: "githubRepo"}},
 						Default:     os.Getenv("PIPER_repository"),
 					},
