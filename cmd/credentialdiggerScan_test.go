@@ -34,7 +34,7 @@ func TestCredentialdiggerFullScan(t *testing.T) {
 	t.Run("Valid full scan without discoveries", func(t *testing.T) {
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken"}
 		utils := newCDTestsUtils()
-		assert.Equal(t, 0, credentialdiggerFullScan(&config, nil, utils))
+		assert.Equal(t, nil, credentialdiggerFullScan(&config, nil, utils))
 
 	})
 	t.Run("Full scan with discoveries or wrong arguments", func(t *testing.T) {
@@ -49,7 +49,7 @@ func TestCredentialdiggerScanSnapshot(t *testing.T) {
 	t.Run("Valid scan snapshot without discoveries", func(t *testing.T) {
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken", Snapshot: "main"}
 		utils := newCDTestsUtils()
-		assert.Equal(t, 0, credentialdiggerScanSnapshot(&config, nil, utils))
+		assert.Equal(t, nil, credentialdiggerScanSnapshot(&config, nil, utils))
 	})
 	t.Run("Scan snapshot with discoveries or wrong arguments", func(t *testing.T) {
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken", Snapshot: "main"}
@@ -63,7 +63,7 @@ func TestCredentialdiggerScanPR(t *testing.T) {
 	t.Run("Valid scan pull request without discoveries", func(t *testing.T) {
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken", PrNumber: 1}
 		utils := newCDTestsUtils()
-		assert.Equal(t, 0, credentialdiggerScanPR(&config, nil, utils))
+		assert.Equal(t, nil, credentialdiggerScanPR(&config, nil, utils))
 	})
 	t.Run("Scan pull request with discoveries or wrong arguments", func(t *testing.T) {
 		config := credentialdiggerScanOptions{Repository: "testRepo", Token: "validToken", PrNumber: 1}
@@ -121,30 +121,4 @@ func TestCredentialdiggerBuildCommonArgs(t *testing.T) {
 		assert.Equal(t, arguments, credentialdiggerBuildCommonArgs(&config))
 	})
 
-}
-
-func TestCredentialdiggerGetDiscoveries(t *testing.T) {
-	t.Run("Empty discoveries", func(t *testing.T) {
-		config := credentialdiggerScanOptions{Repository: "testRepo"}
-		utils := newCDTestsUtils()
-		assert.Equal(t, nil, credentialdiggerGetDiscoveries(&config, nil, utils))
-	})
-	t.Run("Get discoveries non-empty", func(t *testing.T) {
-		config := credentialdiggerScanOptions{Repository: "testRepo"}
-		utils := newCDTestsUtils()
-		utils.noerr = false
-		assert.EqualError(t, credentialdiggerGetDiscoveries(&config, nil, utils), "Some custom error")
-	})
-}
-
-func TestCredentialdiggerBuildCommonArgs(t *testing.T) {
-	t.Run("Valid build common args", func(t *testing.T) {
-		arguments := []string{"repoURL", "--sqlite", "piper_step_db.db", "--git_token", "validToken",
-			"--debug", "--models", "model1", "model2"}
-		config := credentialdiggerScanOptions{Repository: "repoURL", Token: "validToken", Snapshot: "main",
-			Debug: true, PrNumber: 1,
-			Models: []string{"model1", "model2"},
-		}
-		assert.Equal(t, arguments, credentialdiggerBuildCommonArgs(&config))
-	})
 }
