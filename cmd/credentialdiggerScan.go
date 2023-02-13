@@ -128,6 +128,15 @@ func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData
 	// Set the rule file to the standard ruleset shipped withing credential
 	// digger
 	ruleFile := filepath.Join(cdHome, "backend", "rules.yml")
+
+	// Verify if a custom rulesFile was passed as input artifact
+	ex, err := piperutils.FileExists("/credential-digger-ui/backend/custom-rules.yml")
+	if ex && err == nil {
+		log.Entry().Info("Use custom file with rules")
+		// point to this file instead of the standard ruleset
+		ruleFile = filepath.Join("/credential-digger-ui", "backend", "custom-rules.yml")
+	}
+
 	if config.RulesDownloadURL != "" {
 		// Download custom rule file from this URL
 		log.Entry().Debugf("Download custom ruleset from %v", config.RulesDownloadURL)
