@@ -138,21 +138,19 @@ func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData
 	// digger
 	ruleFile := filepath.Join(cdHome, "backend", "rules.yml")
 
-	// use config
+	// use rules defined in stashed file
 	if hasRulesFile(config.RulesFile, service) {
-		// options = append(options, "--config", config.ConfigurationFile)
-		log.Entry().WithField("file", config.RulesFile).Info("Using rules file from repo")
-	} else {
-		log.Entry().Info("No rules file found.")
+		log.Entry().WithField("file", config.RulesFile).Info("Using stashed rules file from repository")
+		ruleFile = config.RulesFile
 	}
 
-	// Verify if a custom rulesFile was passed as input artifact
-	ex, err := piperutils.FileExists("/credential-digger-ui/backend/custom-rules.yml")
-	if ex && err == nil {
-		log.Entry().Info("Use custom file with rules")
-		// point to this file instead of the standard ruleset
-		ruleFile = filepath.Join("/credential-digger-ui", "backend", "custom-rules.yml")
-	}
+	//// Verify if a custom rulesFile was passed as input artifact
+	//ex, err := piperutils.FileExists("/credential-digger-ui/backend/custom-rules.yml")
+	//if ex && err == nil {
+	//	log.Entry().Info("Use custom file with rules")
+	//	// point to this file instead of the standard ruleset
+	//	ruleFile = filepath.Join("/credential-digger-ui", "backend", "custom-rules.yml")
+	//}
 
 	if config.RulesDownloadURL != "" {
 		// Download custom rule file from this URL
