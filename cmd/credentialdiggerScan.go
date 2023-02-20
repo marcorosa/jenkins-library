@@ -118,6 +118,15 @@ func executeCredentialDiggerProcess(utils credentialdiggerUtils, args []string) 
 	return utils.RunExecutable("credentialdigger", args...)
 }
 
+// hasConfigurationFile checks if the given file exists
+func hasRulesFile(file string, utils credentialdiggerUtils) bool {
+	exists, err := utils.FileExists(file)
+	if err != nil {
+		log.Entry().WithError(err).Error()
+	}
+	return exists
+}
+
 func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData *telemetry.CustomData, service credentialdiggerUtils) error {
 	// Credentialdigger home can be changed with local forks (e.g., for local piper runs)
 	cdHome := "/credential-digger-ui" // cdHome as in docker container
@@ -128,6 +137,14 @@ func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData
 	// Set the rule file to the standard ruleset shipped withing credential
 	// digger
 	ruleFile := filepath.Join(cdHome, "backend", "rules.yml")
+
+	// use config
+	if hasRulesFile(config.RulesFile, service) {
+		// options = append(options, "--config", config.ConfigurationFile)
+		log.Entry().WithField("file", config.RulesFile).Info("Using rules file from repo")
+	} else {
+		log.Entry().Debug("No rules file found.")
+	}
 
 	// Verify if a custom rulesFile was passed as input artifact
 	ex, err := piperutils.FileExists("/credential-digger-ui/backend/custom-rules.yml")

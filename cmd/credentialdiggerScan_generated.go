@@ -152,7 +152,7 @@ func credentialdiggerScanMetadata() config.StepData {
 					{Name: "githubTokenCredentialsId", Description: "Jenkins 'Secret text' credentials ID containing token to authenticate to GitHub.", Type: "jenkins"},
 				},
 				Resources: []config.StepResources{
-					{Name: "rulesFile", Type: "file"},
+					{Name: "rulesFile", Type: "stash"},
 				},
 				Parameters: []config.StepParameters{
 					{
