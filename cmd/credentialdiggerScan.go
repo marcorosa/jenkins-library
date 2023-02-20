@@ -139,11 +139,11 @@ func credentialdiggerAddRules(config *credentialdiggerScanOptions, telemetryData
 	ruleFile := filepath.Join(cdHome, "backend", "rules.yml")
 
 	// use config
-	if hasRulesFile(config.rulesFile, service) {
+	if hasRulesFile(config.RulesFile, service) {
 		// options = append(options, "--config", config.ConfigurationFile)
-		log.Entry().WithField("file", config.rulesFile).Info("Using rules file from repo")
+		log.Entry().WithField("file", config.RulesFile).Info("Using rules file from repo")
 	} else {
-		log.Entry().Debug("No rules file found.")
+		log.Entry().Info("No rules file found.")
 	}
 
 	// Verify if a custom rulesFile was passed as input artifact
