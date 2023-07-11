@@ -171,11 +171,10 @@ func credentialdiggerGetDiscoveries(config *credentialdiggerScanOptions, telemet
 	}
 	err := executeCredentialDiggerProcess(service, cmd_list)
 	if err != nil {
-		log.Entry().Error("credentialdiggerScan: Failed running credentialdigger get_discoveries")
-		log.Entry().Error(err)
+		log.Entry().Warn("credentialdiggerScan: The report shows potential leaks")
 		return err
 	}
-	log.Entry().Info("credentialdiggerScan: Scan complete")
+	log.Entry().Info("credentialdiggerScan: Scan complete with no potential leaks")
 	return nil
 }
 
